@@ -1,0 +1,273 @@
+{
+  "threat_event": {
+    "basic_info": {
+      "id": {
+        "type": "bigint",
+        "description": "ID",
+        "required": true
+      },
+      "system_code": {
+        "type": "varchar",
+        "description": "系统编号",
+        "required": true
+      },
+      "name": {
+        "type": "varchar",
+        "description": "名称",
+        "required": true
+      },
+      "description": {
+        "type": "varchar",
+        "description": "描述",
+        "required": true
+      },
+      "type": {
+        "type": "varchar",
+        "description": "分类",
+        "required": true
+      },
+      "attacker": {
+        "type": "varchar",
+        "description": "攻击者",
+        "required": true
+      },
+      "victimer": {
+        "type": "varchar",
+        "description": "受害者",
+        "required": true
+      },
+      "start_time": {
+        "type": "datetime",
+        "description": "事件开始时间",
+        "required": true
+      },
+      "end_time": {
+        "type": "datetime",
+        "description": "事件结束时间",
+        "required": true
+      },
+      "found_time": {
+        "type": "datetime",
+        "description": "监测时间",
+        "required": true
+      },
+      "source": {
+        "type": "varchar",
+        "description": "数据来源",
+        "required": true
+      },
+      "mitre_technique_id": {
+        "type": "text",
+        "description": "att&ck_id",
+        "required": true
+      },
+      "attsck_list": {
+        "type": "varchar",
+        "description": "技战法列表",
+        "required": true
+      },
+      "attack_tool": {
+        "type": "varchar",
+        "description": "攻击工具",
+        "required": true
+      },
+      "first_found_time": {
+        "type": "datetime",
+        "description": "首次发现时间",
+        "required": true
+      },
+      "priority": {
+        "type": "varchar",
+        "description": "优先级",
+        "required": true
+      },
+      "severity": {
+        "type": "varchar",
+        "description": "等级",
+        "required": true
+      },
+      "dispose_status": {
+        "type": "varchar",
+        "description": "处置状态",
+        "required": true
+      },
+      "app": {
+        "type": "varchar",
+        "description": "应用程序",
+        "required": false
+      },
+      "impact_assessment": {
+        "type": "varchar",
+        "description": "影响评估",
+        "required": false
+      }
+    },
+    "alert_info": {
+      "merge_alerts": {
+        "type": "json",
+        "description": "收敛告警列表",
+        "required": false,
+        "fields": {
+          "alert_id": {
+            "type": "varchar",
+            "description": "告警ID"
+          },
+          "alert_type": {
+            "type": "varchar",
+            "description": "告警类型"
+          },
+          "alert_time": {
+            "type": "datetime",
+            "description": "告警时间"
+          }
+        }
+      }
+    },
+    "threat_info": {
+      "threat_actor": {
+        "type": "json",
+        "description": "威胁主体列表",
+        "required": false,
+        "fields": {
+          "name": {
+            "type": "varchar",
+            "description": "名称"
+          },
+          "country": {
+            "type": "varchar",
+            "description": "国家"
+          },
+          "group": {
+            "type": "varchar",
+            "description": "组织"
+          }
+        }
+      },
+      "org": {
+        "type": "json",
+        "description": "威胁目标",
+        "required": false,
+        "fields": {
+          "name": {
+            "type": "varchar",
+            "description": "名称"
+          },
+          "location": {
+            "type": "varchar",
+            "description": "位置"
+          }
+        }
+      }
+    },
+    "asset_info": {
+      "attack_asset_ip": {
+        "type": "json",
+        "description": "主要攻击者IP列表",
+        "required": false
+      },
+      "victim_asset_ip": {
+        "type": "json",
+        "description": "主要被攻击者IP列表",
+        "required": false
+      },
+      "attack_asset_ip_port": {
+        "type": "json",
+        "description": "主要攻击者端口列表",
+        "required": false
+      },
+      "victim_asset_ip_port": {
+        "type": "json",
+        "description": "主要被攻击者端口列表",
+        "required": false
+      },
+      "attack_asset_domain": {
+        "type": "json",
+        "description": "主要攻击者域名列表",
+        "required": false
+      },
+      "victim_asset_domain": {
+        "type": "json",
+        "description": "主要被攻击者域名列表",
+        "required": false
+      },
+      "attack_url": {
+        "type": "json",
+        "description": "主要攻击者URL列表",
+        "required": false
+      },
+      "victim_url": {
+        "type": "json",
+        "description": "主要被攻击者URL列表",
+        "required": false
+      }
+    },
+    "malware_info": {
+      "attack_malware": {
+        "type": "json",
+        "description": "主要攻击者恶意代码列表",
+        "required": false
+      },
+      "attack_malware_sample": {
+        "type": "json",
+        "description": "主要攻击者样本列表",
+        "required": false
+      },
+      "attack_malware_sample_family": {
+        "type": "json",
+        "description": "主要攻击者样本家族列表",
+        "required": false
+      }
+    },
+    "communication_info": {
+      "attack_email_address": {
+        "type": "json",
+        "description": "主要攻击者邮箱列表",
+        "required": false
+      },
+      "victim_email_address": {
+        "type": "json",
+        "description": "主要被攻击者邮箱列表",
+        "required": false
+      },
+      "attack_email": {
+        "type": "json",
+        "description": "主要攻击者邮件列表",
+        "required": false
+      },
+      "victim_email": {
+        "type": "json",
+        "description": "主要被攻击者邮件列表",
+        "required": false
+      }
+    },
+    "software_vuln_info": {
+      "attack_software": {
+        "type": "json",
+        "description": "主要攻击者软件列表",
+        "required": false
+      },
+      "victim_software": {
+        "type": "json",
+        "description": "主要被攻击者软件列表",
+        "required": false
+      },
+      "attack_vulnerability": {
+        "type": "json",
+        "description": "主要攻击者漏洞列表",
+        "required": false
+      }
+    },
+    "certificate_info": {
+      "attack_certificate": {
+        "type": "json",
+        "description": "主要攻击者证书列表",
+        "required": false
+      },
+      "victim_certificate": {
+        "type": "json",
+        "description": "主要被攻击者证书列表",
+        "required": false
+      }
+    }
+  }
+}

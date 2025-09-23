@@ -1,0 +1,123 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/api/alerts/malicious-sample/query",
+    "headers": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer <token>"
+    },
+    "body": {
+      "alarm_ids": [
+        "MS-2024-001-ABC456",
+        "MS-2024-002-DEF789"
+      ]
+    }
+  },
+  "response": {
+    "code": 200,
+    "message": "查询成功",
+    "data": [
+      {
+        "alarm_id": "MS-2024-001-ABC456",
+        "alarm_date": 1735142400000,
+        "alarm_severity": 3,
+        "alarm_name": "Emotet银行木马变种检测",
+        "alarm_description": "检测到Emotet银行木马最新变种，该样本具有窃取银行凭证和传播能力",
+        "alarm_type": 2,
+        "alarm_subtype": 2003,
+        "source": 4,
+        "control_rule_id": "RULE-TROJAN-2024-001",
+        "control_task_id": "TASK-MAL-2024-200",
+        "procedure_technique_id": ["T1055", "T1566.001"],
+        "session_id": "",
+        "ip_version": null,
+        "src_ip": "",
+        "src_port": null,
+        "dst_ip": "",
+        "dst_port": null,
+        "protocol": "",
+        "terminal_id": "TERM-FIN-PC-002",
+        "source_file_path": "/data/samples/2024/12/25/sample_142400.exe",
+        "sample_source": 2,
+        "md5": "d41d8cd98f00b204e9800998ecf8427e",
+        "sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sha512": "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
+        "ssdeep": "96:K7tqRtpEDC6J0wn9JNJNJv:S85DJ0wnxJv",
+        "sample_original_name": "invoice_2024.exe",
+        "sample_description": "",
+        "sample_family": "Emotet",
+        "apt_group": "",
+        "sample_alarm_engine": [1, 2],
+        "target_platform": "Windows x64",
+        "file_type": "PE32+ executable",
+        "file_size": 458752,
+        "language": "C++",
+        "rule": "YARA:Emotet_Dropper_2024, AV:Trojan.Win32.Emotet",
+        "target_content": "",
+        "compile_date": 1735056000000,
+        "last_analy_date": 1735142400000,
+        "sample_alarm_detail": "[{\"rule_name\":\"Emotet_Dropper_2024\"},{\"av_engine_name\":\"Kaspersky\",\"av_label\":\"Trojan.Win32.Emotet.gen\"},{\"av_engine_name\":\"BitDefender\",\"av_label\":\"Trojan.GenericKD.65432\"}]"
+      },
+      {
+        "alarm_id": "MS-2024-002-DEF789",
+        "alarm_date": 1735146000000,
+        "alarm_severity": 3,
+        "alarm_name": "WannaCry勒索软件检测",
+        "alarm_description": "发现WannaCry勒索软件样本，该样本会加密系统文件并索要比特币赎金",
+        "alarm_type": 2,
+        "alarm_subtype": 2005,
+        "source": 1,
+        "control_rule_id": "0",
+        "control_task_id": "0",
+        "procedure_technique_id": ["T1486", "T1083"],
+        "session_id": "SESSION-20241225-150000-010",
+        "ip_version": 4,
+        "src_ip": "192.168.1.50",
+        "src_port": 54321,
+        "dst_ip": "185.234.218.100",
+        "dst_port": 443,
+        "protocol": "HTTPS",
+        "terminal_id": "",
+        "source_file_path": "/data/samples/2024/12/25/sample_150000.exe",
+        "sample_source": 1,
+        "md5": "84c82835a5d21bbcf75a61706d8ab549",
+        "sha1": "51e4307093f8ca8854359c0ac882ddca427a813c",
+        "sha256": "24d004a104d4d54034dbcffc2a4b19a11f39008a575aa614ea04703480b1022c",
+        "sha512": "7fff17b2e650d6b6fe06a15451d50d03c3e5ef9b1f8523a96e1c3c239b7c45f6a862f889c3e2e1a8e5c8f1234567890abcdef1234567890abcdef1234567890ab",
+        "ssdeep": "12288:WnCylRJQKGFtLoBSKxFLBoBJCFLBJFx:WnCy1JhGF3oBDx3oBhF3hx",
+        "sample_original_name": "tasksche.exe",
+        "sample_description": "",
+        "sample_family": "WannaCry",
+        "apt_group": "Lazarus Group",
+        "sample_alarm_engine": [1, 2, 3],
+        "target_platform": "Windows x86/x64",
+        "file_type": "PE32 executable",
+        "file_size": 3514368,
+        "language": "C++",
+        "rule": "YARA:WannaCry_Ransomware, IOC:SHA256_Match",
+        "target_content": "Encrypted file extensions: .WNCRY",
+        "compile_date": 1494547200000,
+        "last_analy_date": 1735146000000,
+        "sample_alarm_detail": "{\"ioc_type\":\"SHA256\",\"ioc_value\":\"24d004a104d4d54034dbcffc2a4b19a11f39008a575aa614ea04703480b1022c\"}"
+      }
+    ]
+  },
+  "error_response": {
+    "code": 404,
+    "message": "未找到指定告警",
+    "error": {
+      "alarm_ids": ["MS-2024-999-XXX999"],
+      "reason": "告警ID不存在"
+    }
+  },
+  "response_codes": {
+    "200": "请求成功",
+    "400": "请求参数错误",
+    "401": "未授权访问",
+    "403": "权限不足",
+    "404": "资源不存在",
+    "500": "服务器内部错误",
+    "503": "服务不可用"
+  }
+}

@@ -1,0 +1,117 @@
+version: '3.8'
+
+services:
+  # JobManager - Flink Master Node
+  flink-jobmanager:
+    image: flink:1.18-scala_2.12
+    container_name: flink-jobmanager
+    ports:
+      - "8081:8081"  # Web UI
+      - "6123:6123"  # RPC port
+    command: jobmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+      - FLINK_PROPERTIES=
+        jobmanager.rpc.address=flink-jobmanager
+        jobmanager.rpc.port=6123
+        jobmanager.memory.process.size=2g
+        taskmanager.numberOfTaskSlots=4
+        state.backend=filesystem
+        state.checkpoints.dir=file:///tmp/flink-checkpoints
+        state.savepoints.dir=file:///tmp/flink-savepoints
+    volumes:
+      - flink-jobmanager-data:/tmp/flink-checkpoints
+      - flink-savepoints:/tmp/flink-savepoints
+      - ./flink-jobs:/opt/flink/jobs  # Mount directory for JAR files
+    networks:
+      - flink-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # TaskManager - Flink Worker Node 1
+  flink-taskmanager-1:
+    image: flink:1.18-scala_2.12
+    container_name: flink-taskmanager-1
+    depends_on:
+      - flink-jobmanager
+    command: taskmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+      - FLINK_PROPERTIES=
+        jobmanager.rpc.address=flink-jobmanager
+        jobmanager.rpc.port=6123
+        taskmanager.numberOfTaskSlots=4
+        taskmanager.memory.process.size=2g
+        taskmanager.memory.network.fraction=0.1
+        taskmanager.memory.network.min=128mb
+        taskmanager.memory.network.max=512mb
+    volumes:
+      - flink-taskmanager-1-data:/tmp
+      - ./flink-jobs:/opt/flink/jobs
+    networks:
+      - flink-network
+    restart: unless-stopped
+
+  # TaskManager - Flink Worker Node 2 (Optional, for scaling)
+  flink-taskmanager-2:
+    image: flink:1.18-scala_2.12
+    container_name: flink-taskmanager-2
+    depends_on:
+      - flink-jobmanager
+    command: taskmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+      - FLINK_PROPERTIES=
+        jobmanager.rpc.address=flink-jobmanager
+        jobmanager.rpc.port=6123
+        taskmanager.numberOfTaskSlots=4
+        taskmanager.memory.process.size=2g
+        taskmanager.memory.network.fraction=0.1
+        taskmanager.memory.network.min=128mb
+        taskmanager.memory.network.max=512mb
+    volumes:
+      - flink-taskmanager-2-data:/tmp
+      - ./flink-jobs:/opt/flink/jobs
+    networks:
+      - flink-network
+    restart: unless-stopped
+
+  # SQL Client for Interactive Queries
+  flink-sql-client:
+    image: flink:1.18-scala_2.12
+    container_name: flink-sql-client
+    depends_on:
+      - flink-jobmanager
+    command: bin/sql-client.sh
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+      - FLINK_PROPERTIES=
+        jobmanager.rpc.address=flink-jobmanager
+        jobmanager.rpc.port=6123
+    volumes:
+      - ./flink-sql:/opt/sql-client/sql  # Mount SQL scripts
+      - ./flink-jars:/opt/flink/lib/ext   # Mount additional JAR files (connectors, etc.)
+    networks:
+      - flink-network
+    stdin_open: true
+    tty: true
+
+networks:
+  flink-network:
+    driver: bridge
+    name: flink-network
+
+volumes:
+  flink-jobmanager-data:
+    driver: local
+  flink-savepoints:
+    driver: local
+  flink-taskmanager-1-data:
+    driver: local
+  flink-taskmanager-2-data:
+    driver: local

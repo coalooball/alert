@@ -1,0 +1,279 @@
+{
+  "fields": [
+    {
+      "name": "alarm_id",
+      "chinese_name": "告警ID",
+      "type": "string",
+      "max_length": 128,
+      "required": true,
+      "description": "告警唯一标识"
+    },
+    {
+      "name": "alarm_date",
+      "chinese_name": "告警时间",
+      "type": "integer",
+      "required": true,
+      "description": "告警产生日期，格式：1640000000000"
+    },
+    {
+      "name": "alarm_severity",
+      "chinese_name": "威胁等级",
+      "type": "integer",
+      "required": true,
+      "description": "告警威胁等级，1-低危，2-中危，3-高危"
+    },
+    {
+      "name": "alarm_name",
+      "chinese_name": "告警名称",
+      "type": "string",
+      "max_length": 512,
+      "required": true,
+      "description": "告警描述性名称"
+    },
+    {
+      "name": "alarm_description",
+      "chinese_name": "告警描述",
+      "type": "string",
+      "max_length": 1048576,
+      "required": true,
+      "description": "告警描述信息"
+    },
+    {
+      "name": "alarm_type",
+      "chinese_name": "告警类型",
+      "type": "integer",
+      "required": true,
+      "description": "告警类型，1-网络攻击告警，2-恶意样本告警，3-主机行为告警"
+    },
+    {
+      "name": "alarm_subtype",
+      "chinese_name": "告警子类",
+      "type": "integer",
+      "required": true,
+      "description": "告警子类，编码规范见附录"
+    },
+    {
+      "name": "source",
+      "chinese_name": "数据源",
+      "type": "integer",
+      "required": true,
+      "description": "告警数据来源，1-精控流量检测引擎，2-漏洞分析引擎，3-终端日志检测引擎，4-样本检测引擎，5-D3包，6-D7包，7-D5包，8-D6包，9-TL一期，10-D2包，11-其他"
+    },
+    {
+      "name": "control_rule_id",
+      "chinese_name": "布控规则ID",
+      "type": "string",
+      "max_length": 1024,
+      "required": true,
+      "description": "布控规则ID，0代表无布控规则"
+    },
+    {
+      "name": "control_task_id",
+      "chinese_name": "布控任务ID",
+      "type": "string",
+      "max_length": 1024,
+      "required": true,
+      "description": "布控任务ID，0代表无布控任务"
+    },
+    {
+      "name": "procedure_technique_id",
+      "chinese_name": "攻击技战术",
+      "type": "array",
+      "required": false,
+      "description": "告警涉及的攻击技战术，MITRE ATT&CK框架编码"
+    },
+    {
+      "name": "session_id",
+      "chinese_name": "流量会话ID",
+      "type": "string",
+      "max_length": 1048576,
+      "required": false,
+      "description": "原始流量ID"
+    },
+    {
+      "name": "ip_version",
+      "chinese_name": "IP协议版本",
+      "type": "integer",
+      "required": false,
+      "description": "IP协议版本，4-IPv4，6-IPv6"
+    },
+    {
+      "name": "src_ip",
+      "chinese_name": "源IP",
+      "type": "string",
+      "required": false,
+      "description": "攻击源IP"
+    },
+    {
+      "name": "src_port",
+      "chinese_name": "源端口",
+      "type": "integer",
+      "required": false,
+      "description": "攻击源端口，0-65535"
+    },
+    {
+      "name": "dst_ip",
+      "chinese_name": "目的IP",
+      "type": "string",
+      "required": false,
+      "description": "攻击目的IP"
+    },
+    {
+      "name": "dst_port",
+      "chinese_name": "目的端口",
+      "type": "integer",
+      "required": false,
+      "description": "攻击目的端口，0-65535"
+    },
+    {
+      "name": "protocol",
+      "chinese_name": "通信协议",
+      "type": "string",
+      "max_length": 128,
+      "required": false,
+      "description": "告警流通信协议名称"
+    },
+    {
+      "name": "terminal_id",
+      "chinese_name": "终端ID",
+      "type": "string",
+      "max_length": 1048576,
+      "required": false,
+      "description": "终端唯一标识"
+    },
+    {
+      "name": "source_file_path",
+      "chinese_name": "原始数据存储地址",
+      "type": "string",
+      "max_length": 1024,
+      "required": false,
+      "description": "告警对应原始数据存储地址"
+    },
+    {
+      "name": "host_name",
+      "chinese_name": "终端名称",
+      "type": "string",
+      "required": true,
+      "description": "终端名称"
+    },
+    {
+      "name": "terminal_ip",
+      "chinese_name": "终端IP",
+      "type": "string",
+      "required": true,
+      "description": "终端IP地址，D8不区分公网IP和内网IP"
+    },
+    {
+      "name": "user_account",
+      "chinese_name": "用户账号",
+      "type": "string",
+      "required": true,
+      "description": "终端用户账号"
+    },
+    {
+      "name": "terminal_os",
+      "chinese_name": "终端操作系统",
+      "type": "string",
+      "required": true,
+      "description": "终端操作系统"
+    },
+    {
+      "name": "dst_process_md5",
+      "chinese_name": "目标进程md5",
+      "type": "string",
+      "length": 32,
+      "required": false,
+      "description": "风险目标进程对应的md5值，16字节"
+    },
+    {
+      "name": "dst_process_path",
+      "chinese_name": "目标进程路径",
+      "type": "string",
+      "required": false,
+      "description": "风险目标进程的路径"
+    },
+    {
+      "name": "dst_process_cli",
+      "chinese_name": "目标进程命令行",
+      "type": "string",
+      "required": false,
+      "description": "风险目标进程命令行内容"
+    },
+    {
+      "name": "src_process_md5",
+      "chinese_name": "父进程md5",
+      "type": "string",
+      "length": 32,
+      "required": false,
+      "description": "父进程的md5值，16字节"
+    },
+    {
+      "name": "src_process_path",
+      "chinese_name": "父进程路径",
+      "type": "string",
+      "required": false,
+      "description": "父进程的路径"
+    },
+    {
+      "name": "src_process_cli",
+      "chinese_name": "父进程命令行",
+      "type": "string",
+      "required": false,
+      "description": "父进程命令行内容"
+    },
+    {
+      "name": "register_key_name",
+      "chinese_name": "注册表键名称",
+      "type": "string",
+      "required": false,
+      "description": "注册表键名称"
+    },
+    {
+      "name": "register_key_value",
+      "chinese_name": "注册表键值",
+      "type": "string",
+      "required": false,
+      "description": "注册表键值"
+    },
+    {
+      "name": "register_path",
+      "chinese_name": "注册表路径",
+      "type": "string",
+      "required": false,
+      "description": "注册表路径"
+    },
+    {
+      "name": "file_name",
+      "chinese_name": "文件名称",
+      "type": "string",
+      "required": false,
+      "description": "文件名称"
+    },
+    {
+      "name": "file_md5",
+      "chinese_name": "文件md5",
+      "type": "string",
+      "length": 32,
+      "required": false,
+      "description": "文件md5，16字节"
+    },
+    {
+      "name": "file_path",
+      "chinese_name": "文件路径",
+      "type": "string",
+      "required": false,
+      "description": "文件路径"
+    }
+  ],
+  "alarm_subtypes": {
+    "03001": "挖矿攻击",
+    "03002": "勒索攻击",
+    "03003": "远控攻击",
+    "03004": "爆破攻击",
+    "03005": "后门攻击",
+    "03006": "注入攻击",
+    "03007": "横向移动攻击",
+    "03008": "数据窃取攻击",
+    "03009": "其它异常行为告警"
+  }
+}

@@ -1,0 +1,378 @@
+{
+  "fields": [
+    {
+      "name": "alarm_id",
+      "chinese_name": "告警ID",
+      "type": "string",
+      "max_length": 128,
+      "required": true,
+      "description": "告警唯一标识"
+    },
+    {
+      "name": "alarm_date",
+      "chinese_name": "告警时间",
+      "type": "integer",
+      "required": true,
+      "description": "告警产生日期，格式：1640000000000"
+    },
+    {
+      "name": "alarm_severity",
+      "chinese_name": "威胁等级",
+      "type": "integer",
+      "required": true,
+      "description": "告警威胁等级，1-低危，2-中危，3-高危"
+    },
+    {
+      "name": "alarm_name",
+      "chinese_name": "告警名称",
+      "type": "string",
+      "max_length": 512,
+      "required": true,
+      "description": "告警描述性名称"
+    },
+    {
+      "name": "alarm_description",
+      "chinese_name": "告警描述",
+      "type": "string",
+      "max_length": 1048576,
+      "required": true,
+      "description": "告警描述信息"
+    },
+    {
+      "name": "alarm_type",
+      "chinese_name": "告警类型",
+      "type": "integer",
+      "required": true,
+      "description": "告警类型，1-网络攻击告警，2-恶意样本告警，3-主机行为告警"
+    },
+    {
+      "name": "alarm_subtype",
+      "chinese_name": "告警子类",
+      "type": "integer",
+      "required": true,
+      "description": "告警子类，编码规范见附录"
+    },
+    {
+      "name": "source",
+      "chinese_name": "数据源",
+      "type": "integer",
+      "required": true,
+      "description": "告警数据来源，1-精控流量检测引擎，2-漏洞分析引擎，3-终端日志检测引擎，4-样本检测引擎，5-D3包，6-D7包，7-D5包，8-D6包，9-TL一期，10-D2包，11-其他"
+    },
+    {
+      "name": "control_rule_id",
+      "chinese_name": "布控规则ID",
+      "type": "string",
+      "max_length": 1024,
+      "required": true,
+      "description": "布控规则ID，0代表无布控规则"
+    },
+    {
+      "name": "control_task_id",
+      "chinese_name": "布控任务ID",
+      "type": "string",
+      "max_length": 1024,
+      "required": true,
+      "description": "布控任务ID，0代表无布控任务"
+    },
+    {
+      "name": "procedure_technique_id",
+      "chinese_name": "攻击技战术",
+      "type": "array",
+      "required": false,
+      "description": "告警涉及的攻击技战术，MITRE ATT&CK框架编码"
+    },
+    {
+      "name": "session_id",
+      "chinese_name": "流量会话ID",
+      "type": "string",
+      "max_length": 1048576,
+      "required": false,
+      "description": "原始流量ID"
+    },
+    {
+      "name": "ip_version",
+      "chinese_name": "IP协议版本",
+      "type": "integer",
+      "required": false,
+      "description": "IP协议版本，4-IPv4，6-IPv6"
+    },
+    {
+      "name": "src_ip",
+      "chinese_name": "源IP",
+      "type": "string",
+      "required": false,
+      "description": "攻击源IP"
+    },
+    {
+      "name": "src_port",
+      "chinese_name": "源端口",
+      "type": "integer",
+      "required": false,
+      "description": "攻击源端口，0-65535"
+    },
+    {
+      "name": "dst_ip",
+      "chinese_name": "目的IP",
+      "type": "string",
+      "required": false,
+      "description": "攻击目的IP"
+    },
+    {
+      "name": "dst_port",
+      "chinese_name": "目的端口",
+      "type": "integer",
+      "required": false,
+      "description": "攻击目的端口，0-65535"
+    },
+    {
+      "name": "protocol",
+      "chinese_name": "通信协议",
+      "type": "string",
+      "max_length": 128,
+      "required": false,
+      "description": "告警流通信协议名称"
+    },
+    {
+      "name": "terminal_id",
+      "chinese_name": "终端ID",
+      "type": "string",
+      "max_length": 1048576,
+      "required": false,
+      "description": "终端唯一标识"
+    },
+    {
+      "name": "source_file_path",
+      "chinese_name": "原始数据存储地址",
+      "type": "string",
+      "max_length": 1024,
+      "required": false,
+      "description": "告警对应原始数据存储地址"
+    },
+    {
+      "name": "sample_source",
+      "chinese_name": "样本收集来源",
+      "type": "integer",
+      "required": true,
+      "description": "样本来源，0-用户上传，1-精控流量，2-终端收集"
+    },
+    {
+      "name": "md5",
+      "chinese_name": "MD5",
+      "type": "string",
+      "length": 32,
+      "required": true,
+      "description": "MD5哈希，固定32字节长度字符串"
+    },
+    {
+      "name": "sha1",
+      "chinese_name": "SHA1",
+      "type": "string",
+      "length": 40,
+      "required": true,
+      "description": "SHA1哈希，固定40字节长度字符串"
+    },
+    {
+      "name": "sha256",
+      "chinese_name": "SHA256",
+      "type": "string",
+      "length": 64,
+      "required": true,
+      "description": "SHA256哈希，固定64字节长度字符串"
+    },
+    {
+      "name": "sha512",
+      "chinese_name": "SHA512",
+      "type": "string",
+      "length": 128,
+      "required": true,
+      "description": "SHA512哈希，固定128字节长度字符串"
+    },
+    {
+      "name": "ssdeep",
+      "chinese_name": "ssdeep",
+      "type": "string",
+      "max_length": 1024,
+      "required": true,
+      "description": "Ssdeep模糊哈希信息"
+    },
+    {
+      "name": "sample_original_name",
+      "chinese_name": "样本原始名称",
+      "type": "string",
+      "max_length": 256,
+      "required": false,
+      "description": "样本的原始文件名"
+    },
+    {
+      "name": "sample_description",
+      "chinese_name": "样本描述信息",
+      "type": "string",
+      "max_length": 1024,
+      "required": false,
+      "description": "样本的描述性信息，只有用户上传的样本文件有此信息"
+    },
+    {
+      "name": "sample_family",
+      "chinese_name": "样本家族",
+      "type": "string",
+      "max_length": 128,
+      "required": true,
+      "description": "样本家族归属"
+    },
+    {
+      "name": "apt_group",
+      "chinese_name": "APT组织",
+      "type": "string",
+      "max_length": 512,
+      "required": false,
+      "description": "Apt组织"
+    },
+    {
+      "name": "sample_alarm_engine",
+      "chinese_name": "告警引擎",
+      "type": "array",
+      "required": true,
+      "description": "给出告警的引擎名称，1-AV，2-YARA，3-IOC"
+    },
+    {
+      "name": "target_platform",
+      "chinese_name": "目标平台",
+      "type": "string",
+      "max_length": 1024,
+      "required": true,
+      "description": "编译器信息"
+    },
+    {
+      "name": "file_type",
+      "chinese_name": "文件类型",
+      "type": "string",
+      "required": true,
+      "description": "恶意样本文件类型"
+    },
+    {
+      "name": "file_size",
+      "chinese_name": "文件大小",
+      "type": "integer",
+      "required": true,
+      "description": "恶意样本文件大小"
+    },
+    {
+      "name": "language",
+      "chinese_name": "语种类型",
+      "type": "string",
+      "max_length": 1024,
+      "required": false,
+      "description": "恶意样本语种类型"
+    },
+    {
+      "name": "rule",
+      "chinese_name": "命中规则",
+      "type": "string",
+      "max_length": 1048576,
+      "required": true,
+      "description": "恶意样本命中规则"
+    },
+    {
+      "name": "target_content",
+      "chinese_name": "命中内容",
+      "type": "string",
+      "max_length": 1048576,
+      "required": false,
+      "description": "恶意样本命中内容"
+    },
+    {
+      "name": "compile_date",
+      "chinese_name": "编译时间",
+      "type": "integer",
+      "required": false,
+      "description": "恶意样本编译时间，格式：1640000000000"
+    },
+    {
+      "name": "last_analy_date",
+      "chinese_name": "最后分析时间",
+      "type": "integer",
+      "required": true,
+      "description": "恶意样本最后分析时间，格式：1640000000000"
+    },
+    {
+      "name": "sample_alarm_detail",
+      "chinese_name": "样本告警详情",
+      "type": "string",
+      "max_length": 1048576,
+      "required": true,
+      "description": "告警数据详细内容，JSON格式自由文本，异构数据，Yara引擎和杀软引擎不同"
+    }
+  ],
+  "alarm_subtypes": {
+    "02001": "计算机病毒",
+    "02002": "网络蠕虫",
+    "02003": "特洛伊木马",
+    "02004": "僵尸网络",
+    "02005": "勒索软件",
+    "02006": "挖矿软件",
+    "02007": "其他恶意样本"
+  },
+  "sample_alarm_detail_formats": {
+    "ioc": {
+      "type": "object",
+      "fields": [
+        {
+          "name": "ioc_type",
+          "chinese_name": "IOC类型",
+          "type": "string",
+          "required": true,
+          "description": "IOC的具体类型信息，MD5/SHA1/SHA256/SHA512"
+        },
+        {
+          "name": "ioc_value",
+          "chinese_name": "IOC",
+          "type": "string",
+          "max_length": 512,
+          "required": true,
+          "description": "IOC具体内容"
+        }
+      ]
+    },
+    "yara": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "fields": [
+          {
+            "name": "rule_name",
+            "chinese_name": "Yara规则名",
+            "type": "string",
+            "max_length": 512,
+            "required": true,
+            "description": "命中的Yara规则名"
+          }
+        ]
+      }
+    },
+    "av": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "fields": [
+          {
+            "name": "av_engine_name",
+            "chinese_name": "杀软引擎名",
+            "type": "string",
+            "max_length": 40,
+            "required": true,
+            "description": "杀软引擎名称"
+          },
+          {
+            "name": "av_label",
+            "chinese_name": "标签",
+            "type": "string",
+            "max_length": 1024,
+            "required": true,
+            "description": "杀软命中的标签信息"
+          }
+        ]
+      }
+    }
+  }
+}
