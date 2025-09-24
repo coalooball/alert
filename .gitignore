@@ -88,3 +88,6 @@ server.log
 *.bak
 *.backup
 *.old
+
+
+prompt.txt

@@ -10,45 +10,7 @@
       <div class="automation-content">
         <el-tabs v-model="activeTab" tab-position="left" class="automation-tabs">
           <el-tab-pane label="告警数据汇聚融合" name="data-aggregation">
-            <div class="content-panel">
-              <h3>告警数据汇聚融合</h3>
-              <div class="section-content">
-                <el-row :gutter="20">
-                  <el-col :span="12">
-                    <div class="info-card">
-                      <h4>数据源管理</h4>
-                      <el-table :data="dataSources" stripe style="width: 100%">
-                        <el-table-column prop="name" label="数据源名称" />
-                        <el-table-column prop="type" label="类型" />
-                        <el-table-column prop="status" label="状态">
-                          <template #default="scope">
-                            <el-tag :type="scope.row.status === '在线' ? 'success' : 'danger'">
-                              {{ scope.row.status }}
-                            </el-tag>
-                          </template>
-                        </el-table-column>
-                      </el-table>
-                    </div>
-                  </el-col>
-                  <el-col :span="12">
-                    <div class="info-card">
-                      <h4>融合规则配置</h4>
-                      <el-form label-width="100px">
-                        <el-form-item label="时间窗口">
-                          <el-input-number v-model="timeWindow" :min="1" :max="60" /> 分钟
-                        </el-form-item>
-                        <el-form-item label="相似度阈值">
-                          <el-slider v-model="similarityThreshold" :min="0" :max="100" show-input />
-                        </el-form-item>
-                        <el-form-item>
-                          <el-button type="primary">保存配置</el-button>
-                        </el-form-item>
-                      </el-form>
-                    </div>
-                  </el-col>
-                </el-row>
-              </div>
-            </div>
+            <AlertFilterRules />
           </el-tab-pane>
 
           <el-tab-pane label="告警数据智能处理" name="intelligent-processing">
@@ -278,6 +240,7 @@
 
 <script>
 import { Setting, Document, Operation, List } from '@element-plus/icons-vue'
+import AlertFilterRules from '../components/AlertFilterRules.vue'
 
 export default {
   name: 'AutomationPage',
@@ -285,7 +248,8 @@ export default {
     Setting,
     Document,
     Operation,
-    List
+    List,
+    AlertFilterRules
   },
   data() {
     return {
