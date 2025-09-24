@@ -16,6 +16,9 @@
           <el-tab-pane label="系统基本信息" name="system">
             <SystemInfo />
           </el-tab-pane>
+          <el-tab-pane label="计算引擎" name="compute">
+            <ComputeEngine />
+          </el-tab-pane>
         </el-tabs>
       </div>
     </el-card>
@@ -26,13 +29,15 @@
 import { Tools } from '@element-plus/icons-vue'
 import UserManagement from '../components/UserManagement.vue'
 import SystemInfo from '../components/SystemInfo.vue'
+import ComputeEngine from '../views/ComputeEngine.vue'
 
 export default {
   name: 'SettingsPage',
   components: {
     Tools,
     UserManagement,
-    SystemInfo
+    SystemInfo,
+    ComputeEngine
   },
   data() {
     return {

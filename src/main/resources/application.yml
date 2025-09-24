@@ -1,0 +1,57 @@
+server:
+  port: ${SERVER_PORT:3000}
+  address: ${SERVER_HOST:127.0.0.1}
+
+spring:
+  application:
+    name: alert-system
+
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/alert_system}
+    username: ${DATABASE_USER:admin}
+    password: ${DATABASE_PASSWORD:postgres123}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 30000
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        show_sql: false
+        jdbc:
+          time_zone: UTC
+    open-in-view: false
+
+  security:
+    jwt:
+      secret: ${JWT_SECRET:your-secret-key-change-this-in-production}
+      expiration-hours: 24
+
+  web:
+    resources:
+      static-locations: file:frontend/dist/
+      cache:
+        period: 0
+
+logging:
+  level:
+    com.alert.system: DEBUG
+    org.springframework.security: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+app:
+  version: 0.1.0
+  cors:
+    allowed-origins: "*"
+    allowed-methods: "*"
+    allowed-headers: "*"
+    allow-credentials: true

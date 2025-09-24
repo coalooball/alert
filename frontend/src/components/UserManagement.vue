@@ -19,14 +19,14 @@
       <el-table-column prop="department" label="部门" width="200" />
       <el-table-column prop="role" label="角色" width="120">
         <template #default="scope">
-          <el-tag :type="scope.row.role === 'Admin' ? 'danger' : 'primary'">
-            {{ scope.row.role === 'Admin' ? '管理员' : '普通用户' }}
+          <el-tag :type="scope.row.role === 'ADMIN' ? 'danger' : 'primary'">
+            {{ scope.row.role === 'ADMIN' ? '管理员' : '普通用户' }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="created_at" label="创建时间" width="180">
+      <el-table-column prop="createdAt" label="创建时间" width="180">
         <template #default="scope">
-          {{ formatDate(scope.row.created_at) }}
+          {{ formatDate(scope.row.createdAt) }}
         </template>
       </el-table-column>
       <el-table-column label="操作" width="120">
@@ -35,7 +35,7 @@
             size="small"
             type="danger"
             @click="deleteUser(scope.row)"
-            :disabled="scope.row.role === 'Admin'"
+            :disabled="scope.row.role === 'ADMIN'"
           >
             删除
           </el-button>
@@ -70,8 +70,8 @@
         </el-form-item>
         <el-form-item label="角色" prop="role">
           <el-select v-model="createForm.role" placeholder="请选择角色">
-            <el-option label="普通用户" value="User" />
-            <el-option label="管理员" value="Admin" />
+            <el-option label="普通用户" value="USER" />
+            <el-option label="管理员" value="ADMIN" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -111,7 +111,7 @@ export default {
         username: '',
         department: '',
         password: '',
-        role: 'User'
+        role: 'USER'
       },
       rules: {
         username: [
@@ -163,7 +163,7 @@ export default {
         username: '',
         department: '',
         password: '',
-        role: 'User'
+        role: 'USER'
       }
       if (this.$refs.createFormRef) {
         this.$refs.createFormRef.clearValidate()
@@ -230,7 +230,21 @@ export default {
       }
     },
     formatDate(dateString) {
-      return new Date(dateString).toLocaleString('zh-CN')
+      if (!dateString) return '-'
+      try {
+        const date = new Date(dateString)
+        if (isNaN(date.getTime())) return '-'
+        return date.toLocaleString('zh-CN', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        })
+      } catch {
+        return '-'
+      }
     }
   }
 }

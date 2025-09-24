@@ -77,7 +77,7 @@ export default {
       return componentMap[this.activeTab]
     },
     isAdmin() {
-      return this.currentUser?.role === 'Admin'
+      return this.currentUser?.role === 'ADMIN' || this.currentUser?.role === 'Admin'
     }
   },
   mounted() {
