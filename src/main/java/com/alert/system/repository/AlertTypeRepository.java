@@ -12,4 +12,8 @@ public interface AlertTypeRepository extends JpaRepository<AlertType, Integer> {
     List<AlertType> findByIsActiveTrueOrderByDisplayOrderAsc();
 
     AlertType findByTypeName(String typeName);
+
+    List<AlertType> findAllByOrderByDisplayOrderAsc();
+
+    List<AlertType> findByIsActiveOrderByDisplayOrderAsc(Boolean isActive);
 }

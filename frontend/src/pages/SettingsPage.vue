@@ -19,6 +19,9 @@
           <el-tab-pane label="计算引擎" name="compute">
             <ComputeEngine />
           </el-tab-pane>
+          <el-tab-pane label="告警数据类型配置" name="alertDataType">
+            <AlertDataTypeConfig />
+          </el-tab-pane>
         </el-tabs>
       </div>
     </el-card>
@@ -30,6 +33,7 @@ import { Tools } from '@element-plus/icons-vue'
 import UserManagement from '../components/UserManagement.vue'
 import SystemInfo from '../components/SystemInfo.vue'
 import ComputeEngine from '../views/ComputeEngine.vue'
+import AlertDataTypeConfig from '../components/AlertDataTypeConfig.vue'
 
 export default {
   name: 'SettingsPage',
@@ -37,7 +41,8 @@ export default {
     Tools,
     UserManagement,
     SystemInfo,
-    ComputeEngine
+    ComputeEngine,
+    AlertDataTypeConfig
   },
   data() {
     return {
