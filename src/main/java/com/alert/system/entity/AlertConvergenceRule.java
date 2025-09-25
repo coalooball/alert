@@ -41,9 +41,26 @@ public class AlertConvergenceRule {
     @Column(name = "convergence_type", nullable = false, length = 50)
     private String convergenceType; // field_match, ml_algorithm
 
-    @Column(name = "convergence_fields", columnDefinition = "text[]")
+    // 计算引擎收敛字段
+    @Column(name = "engine_fields", columnDefinition = "text[]")
     @JdbcTypeCode(SqlTypes.ARRAY)
-    private List<String> convergenceFields;
+    private List<String> engineFields;
+
+    // 机器学习收敛字段
+    @Column(name = "ml_fields", columnDefinition = "text[]")
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    private List<String> mlFields;
+
+    // 机器学习相关配置
+    @Column(name = "use_ml_model")
+    private Boolean useMlModel = false;
+
+    @Column(name = "ml_model_name", length = 100)
+    private String mlModelName;
+
+    @Column(name = "ml_model_config", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, Object> mlModelConfig;
 
     @Column(name = "convergence_config", columnDefinition = "jsonb")
     @JdbcTypeCode(SqlTypes.JSON)
@@ -55,8 +72,6 @@ public class AlertConvergenceRule {
     @Column(name = "min_count")
     private Integer minCount = 2;
 
-    @Column(name = "flink_job_id", length = 100)
-    private String flinkJobId;
 
     @Column(name = "priority")
     private Integer priority = 0;

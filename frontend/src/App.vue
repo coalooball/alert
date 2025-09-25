@@ -10,7 +10,7 @@
           <h1>告警数据智能挖掘系统</h1>
         </div>
         <div class="header-center">
-          <el-tabs v-model="activeTab" @tab-click="handleTabClick">
+          <el-tabs v-model="activeTab" @tab-click="handleTabClick" @dblclick.stop.prevent>
             <el-tab-pane label="态势感知" name="situation"></el-tab-pane>
             <el-tab-pane label="告警数据挖掘" name="datamining"></el-tab-pane>
             <el-tab-pane label="自动化流程管理" name="automation"></el-tab-pane>
@@ -60,8 +60,12 @@ export default {
     ArrowDown
   },
   data() {
+    const validTabs = ['situation', 'datamining', 'automation', 'settings']
+    const storedTab = localStorage.getItem('activeTab')
+    const activeTab = (storedTab && validTabs.includes(storedTab)) ? storedTab : 'situation'
+
     return {
-      activeTab: 'situation',
+      activeTab,
       currentUser: null,
       isLoggedIn: false
     }
@@ -78,6 +82,14 @@ export default {
     },
     isAdmin() {
       return this.currentUser?.role === 'ADMIN' || this.currentUser?.role === 'Admin'
+    }
+  },
+  watch: {
+    activeTab(newVal, oldVal) {
+      if (newVal !== oldVal && newVal) {
+        localStorage.setItem('activeTab', newVal)
+        this.$forceUpdate()
+      }
     }
   },
   mounted() {
@@ -99,6 +111,12 @@ export default {
           if (response.ok) {
             this.currentUser = JSON.parse(storedUser)
             this.isLoggedIn = true
+
+            // 确保有一个有效的标签页
+            if (!this.activeTab || !['situation', 'datamining', 'automation', 'settings'].includes(this.activeTab)) {
+              this.activeTab = 'situation'
+              localStorage.setItem('activeTab', 'situation')
+            }
           } else {
             this.clearAuthData()
           }
@@ -110,6 +128,13 @@ export default {
     handleLoginSuccess(user) {
       this.currentUser = user
       this.isLoggedIn = true
+
+      // 确保有一个有效的标签页
+      if (!this.activeTab || !['situation', 'datamining', 'automation', 'settings'].includes(this.activeTab)) {
+        this.activeTab = 'situation'
+        localStorage.setItem('activeTab', 'situation')
+      }
+
       ElMessage.success(`欢迎，${user.username}！`)
     },
     async handleUserAction(command) {
@@ -128,17 +153,20 @@ export default {
       }
 
       this.clearAuthData()
+      this.activeTab = 'situation'
+      localStorage.removeItem('activeTab')
       ElMessage.success('已退出登录')
     },
     clearAuthData() {
       this.currentUser = null
       this.isLoggedIn = false
-      this.activeTab = 'situation'
       localStorage.removeItem('user')
       localStorage.removeItem('token')
     },
     handleTabClick(tab) {
-      this.activeTab = tab.name
+      if (tab && tab.name && tab.name !== this.activeTab) {
+        this.activeTab = tab.name
+      }
     }
   }
 }

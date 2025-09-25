@@ -73,59 +73,13 @@
         </el-col>
       </el-row>
 
-      <el-row :gutter="20" style="margin-top: 20px;">
-        <el-col :span="12">
-          <div class="info-section">
-            <h3 class="section-title">
-              <el-icon><Clock /></el-icon>
-              运行时间信息
-            </h3>
-            <el-descriptions :column="1" border class="info-descriptions">
-              <el-descriptions-item label="系统启动时间">
-                {{ formatUptime(systemInfo.boot_time) }}
-              </el-descriptions-item>
-              <el-descriptions-item label="服务器运行时间">
-                {{ formatUptime(systemInfo.uptime) }}
-              </el-descriptions-item>
-              <el-descriptions-item label="当前时间">
-                {{ formatDateTime(systemInfo.current_time) }}
-              </el-descriptions-item>
-            </el-descriptions>
-          </div>
-        </el-col>
-
-        <el-col :span="12">
-          <div class="info-section">
-            <h3 class="section-title">
-              <el-icon><Setting /></el-icon>
-              应用信息
-            </h3>
-            <el-descriptions :column="1" border class="info-descriptions">
-              <el-descriptions-item label="应用版本">
-                {{ systemInfo.app_version || '0.1.0' }}
-              </el-descriptions-item>
-              <el-descriptions-item label="数据库连接">
-                <el-tag :type="systemInfo.database_connected ? 'success' : 'danger'">
-                  {{ systemInfo.database_connected ? '已连接' : '未连接' }}
-                </el-tag>
-              </el-descriptions-item>
-              <el-descriptions-item label="服务器地址">
-                {{ systemInfo.server_address || '未知' }}
-              </el-descriptions-item>
-              <el-descriptions-item label="服务器端口">
-                {{ systemInfo.server_port || '未知' }}
-              </el-descriptions-item>
-            </el-descriptions>
-          </div>
-        </el-col>
-      </el-row>
     </el-card>
   </div>
 </template>
 
 <script>
 import { ElMessage } from 'element-plus'
-import { Monitor, Refresh, DataLine, Cpu, Clock, Setting } from '@element-plus/icons-vue'
+import { Monitor, Refresh, DataLine, Cpu } from '@element-plus/icons-vue'
 
 export default {
   name: 'SystemInfo',
@@ -133,9 +87,7 @@ export default {
     Monitor,
     Refresh,
     DataLine,
-    Cpu,
-    Clock,
-    Setting
+    Cpu
   },
   data() {
     return {
@@ -148,14 +100,7 @@ export default {
         architecture: '',
         cpu_cores: 0,
         total_memory: 0,
-        available_memory: 0,
-        boot_time: 0,
-        uptime: 0,
-        current_time: '',
-        app_version: '0.1.0',
-        database_connected: false,
-        server_address: '',
-        server_port: 0
+        available_memory: 0
       }
     }
   },
@@ -201,23 +146,6 @@ export default {
       const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
       const i = Math.floor(Math.log(bytes) / Math.log(k))
       return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-    },
-    formatUptime(seconds) {
-      if (!seconds) return '未知'
-      const days = Math.floor(seconds / 86400)
-      const hours = Math.floor((seconds % 86400) / 3600)
-      const minutes = Math.floor((seconds % 3600) / 60)
-
-      let result = ''
-      if (days > 0) result += `${days}天 `
-      if (hours > 0) result += `${hours}小时 `
-      if (minutes > 0) result += `${minutes}分钟`
-
-      return result || '刚刚启动'
-    },
-    formatDateTime(dateTime) {
-      if (!dateTime) return '未知'
-      return new Date(dateTime).toLocaleString('zh-CN')
     },
     getMemoryColor(percentage) {
       if (percentage < 60) return '#67c23a'

@@ -20,18 +20,28 @@ CREATE TABLE IF NOT EXISTS alert_filter_rules (
 );
 
 -- 2. 收敛规则表
-CREATE TABLE IF NOT EXISTS alert_convergence_rules (
+DROP TABLE IF EXISTS alert_convergence_rules CASCADE;
+CREATE TABLE alert_convergence_rules (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     rule_name VARCHAR(200) NOT NULL,
     rule_description TEXT,
     alert_type INTEGER NOT NULL,
     alert_subtype VARCHAR(20) NOT NULL, -- 收敛是在子类内进行
-    convergence_type VARCHAR(50) NOT NULL, -- field_match:字段匹配, ml_algorithm:机器学习
-    convergence_fields TEXT[] NOT NULL, -- 参与收敛的字段列表
+
+    -- 计算引擎收敛字段
+    engine_fields TEXT[], -- 系统内部计算引擎处理的字段列表
+
+    -- 机器学习收敛字段
+    ml_fields TEXT[], -- 机器学习模型处理的字段列表
+
+    -- 机器学习相关配置
+    use_ml_model BOOLEAN DEFAULT false, -- 是否使用机器学习模型
+    ml_model_name VARCHAR(100), -- 机器学习模型名称
+    ml_model_config JSONB, -- 机器学习模型配置参数
+
     convergence_config JSONB, -- 收敛配置（如时间窗口、阈值等）
     time_window INTEGER DEFAULT 3600, -- 时间窗口（秒）
     min_count INTEGER DEFAULT 2, -- 最小告警数量
-    flink_job_id VARCHAR(100), -- Flink任务ID
     priority INTEGER DEFAULT 0,
     is_enabled BOOLEAN DEFAULT true,
     created_by UUID REFERENCES users(id),
@@ -40,13 +50,16 @@ CREATE TABLE IF NOT EXISTS alert_convergence_rules (
 );
 
 -- 3. 自动标签规则表
-CREATE TABLE IF NOT EXISTS alert_tagging_rules (
+-- DROP TABLE IF EXISTS alert_tagging_rules CASCADE;
+CREATE TABLE alert_tagging_rules (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     rule_name VARCHAR(200) NOT NULL,
     rule_description TEXT,
-    alert_type INTEGER, -- NULL表示适用所有类型
-    alert_subtype VARCHAR(20),
-    match_conditions JSONB NOT NULL, -- 匹配条件 [{field: "xxx", operator: "=", value: "yyy"}]
+    alert_type INTEGER NOT NULL, -- 告警类型（必填）
+    alert_subtype VARCHAR(20) NOT NULL, -- 告警子类型（必填）
+    match_field VARCHAR(100) NOT NULL, -- 匹配字段
+    match_type VARCHAR(20) NOT NULL CHECK (match_type IN ('exact', 'regex')), -- 匹配类型：exact精确匹配, regex正则匹配
+    match_value TEXT NOT NULL, -- 匹配值
     tags TEXT[] NOT NULL, -- 要添加的标签列表
     priority INTEGER DEFAULT 0,
     is_enabled BOOLEAN DEFAULT true,

@@ -10,7 +10,6 @@ import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Entity
@@ -32,15 +31,20 @@ public class AlertTaggingRule {
     @Column(name = "rule_description", columnDefinition = "TEXT")
     private String ruleDescription;
 
-    @Column(name = "alert_type")
-    private Integer alertType; // NULL means applicable to all types
+    @Column(name = "alert_type", nullable = false)
+    private Integer alertType;
 
-    @Column(name = "alert_subtype", length = 20)
+    @Column(name = "alert_subtype", nullable = false, length = 20)
     private String alertSubtype;
 
-    @Column(name = "match_conditions", nullable = false, columnDefinition = "jsonb")
-    @JdbcTypeCode(SqlTypes.JSON)
-    private List<Map<String, Object>> matchConditions;
+    @Column(name = "match_field", nullable = false, length = 100)
+    private String matchField;
+
+    @Column(name = "match_type", nullable = false, length = 20)
+    private String matchType; // exact or regex
+
+    @Column(name = "match_value", nullable = false, columnDefinition = "TEXT")
+    private String matchValue;
 
     @Column(name = "tags", nullable = false, columnDefinition = "text[]")
     @JdbcTypeCode(SqlTypes.ARRAY)
