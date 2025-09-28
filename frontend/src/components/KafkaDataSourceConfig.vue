@@ -9,10 +9,6 @@
         <el-icon><Refresh /></el-icon>
         刷新
       </el-button>
-      <el-button @click="testAllConnections">
-        <el-icon><Connection /></el-icon>
-        测试所有连接
-      </el-button>
     </div>
 
     <el-table :data="configs" v-loading="loading" stripe border @row-click="handleRowClick">
@@ -156,45 +152,6 @@
           </el-row>
         </el-form-item>
 
-        <el-form-item label="数据格式" prop="dataFormat">
-          <el-radio-group v-model="form.dataFormat">
-            <el-radio label="json">JSON</el-radio>
-            <el-radio label="avro">Avro</el-radio>
-            <el-radio label="string">String</el-radio>
-          </el-radio-group>
-        </el-form-item>
-
-        <el-form-item label="字段映射" prop="fieldMapping" v-if="form.dataFormat === 'json'">
-          <div class="field-mapping">
-            <div v-for="(mapping, index) in form.fieldMapping" :key="index" class="mapping-item">
-              <el-select v-model="mapping.sourceField" placeholder="Kafka字段" style="width: 200px">
-                <el-option
-                  v-for="field in commonKafkaFields"
-                  :key="field.value"
-                  :label="field.label"
-                  :value="field.value"
-                />
-              </el-select>
-              <el-icon class="mapping-arrow"><Right /></el-icon>
-              <el-select v-model="mapping.targetField" placeholder="目标字段" style="width: 200px">
-                <el-option
-                  v-for="field in currentAlertFields"
-                  :key="field.value"
-                  :label="field.label"
-                  :value="field.value"
-                />
-              </el-select>
-              <el-button type="danger" size="small" @click="removeMapping(index)" style="margin-left: 10px">
-                <el-icon><Delete /></el-icon>
-              </el-button>
-            </div>
-            <el-button type="primary" size="small" @click="addMapping">
-              <el-icon><Plus /></el-icon>
-              添加映射
-            </el-button>
-          </div>
-        </el-form-item>
-
         <el-form-item label="描述">
           <el-input
             v-model="form.description"
@@ -228,7 +185,6 @@
         <el-descriptions-item label="Topic名称">{{ detailData.topicName }}</el-descriptions-item>
         <el-descriptions-item label="消费者组">{{ detailData.consumerGroup }}</el-descriptions-item>
         <el-descriptions-item label="安全协议">{{ detailData.securityProtocol }}</el-descriptions-item>
-        <el-descriptions-item label="数据格式">{{ detailData.dataFormat }}</el-descriptions-item>
         <el-descriptions-item label="会话超时">{{ detailData.sessionTimeout }}ms</el-descriptions-item>
         <el-descriptions-item label="最大拉取记录数">{{ detailData.maxPollRecords }}</el-descriptions-item>
         <el-descriptions-item label="偏移量重置">{{ detailData.autoOffsetReset }}</el-descriptions-item>
@@ -248,14 +204,6 @@
         <el-descriptions-item label="更新时间">{{ detailData.updateTime }}</el-descriptions-item>
       </el-descriptions>
 
-      <div v-if="detailData && detailData.fieldMapping && detailData.fieldMapping.length" style="margin-top: 20px">
-        <h4>字段映射</h4>
-        <el-table :data="detailData.fieldMapping" border size="small">
-          <el-table-column prop="sourceField" label="Kafka字段" />
-          <el-table-column prop="targetField" label="目标字段" />
-        </el-table>
-      </div>
-
       <template #footer>
         <el-button @click="detailDialogVisible = false">关闭</el-button>
         <el-button type="primary" @click="handleEditFromDetail">编辑</el-button>
@@ -267,12 +215,12 @@
 <script>
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Refresh, Connection, Right, Delete } from '@element-plus/icons-vue'
+import { Plus, Refresh, Right, Delete } from '@element-plus/icons-vue'
 import axios from 'axios'
 
 export default {
   name: 'KafkaDataSourceConfig',
-  components: { Plus, Refresh, Connection, Right, Delete },
+  components: { Plus, Refresh, Right, Delete },
   setup() {
     const configs = ref([])
     const loading = ref(false)
@@ -298,8 +246,6 @@ export default {
       sessionTimeout: 30000,
       maxPollRecords: 500,
       autoOffsetReset: 'latest',
-      dataFormat: 'json',
-      fieldMapping: [{ sourceField: '', targetField: '' }],
       description: '',
       isEnabled: true
     })
@@ -320,33 +266,7 @@ export default {
       consumerGroup: [
         { required: true, message: '请输入消费者组', trigger: 'blur' }
       ],
-      dataFormat: [
-        { required: true, message: '请选择数据格式', trigger: 'change' }
-      ]
     }
-
-    const commonKafkaFields = ref([
-      { label: 'timestamp', value: 'timestamp' },
-      { label: 'message', value: 'message' },
-      { label: 'level', value: 'level' },
-      { label: 'source_ip', value: 'source_ip' },
-      { label: 'dest_ip', value: 'dest_ip' },
-      { label: 'source_port', value: 'source_port' },
-      { label: 'dest_port', value: 'dest_port' },
-      { label: 'protocol', value: 'protocol' },
-      { label: 'event_type', value: 'event_type' },
-      { label: 'severity', value: 'severity' }
-    ])
-
-    const currentAlertFields = computed(() => {
-      if (!form.alertTypeId || !alertFields.value[form.alertTypeId]) {
-        return []
-      }
-      return alertFields.value[form.alertTypeId].map(field => ({
-        label: `${field.fieldLabel} (${field.fieldName})`,
-        value: field.fieldName
-      }))
-    })
 
     const getAlertTypeTagType = (typeName) => {
       const typeMap = {
@@ -361,80 +281,42 @@ export default {
       return configs.value.some(c => c.alertTypeId === alertTypeId && c.id !== form.id)
     }
 
-    const addMapping = () => {
-      form.fieldMapping.push({ sourceField: '', targetField: '' })
-    }
-
-    const removeMapping = (index) => {
-      if (form.fieldMapping.length > 1) {
-        form.fieldMapping.splice(index, 1)
-      }
-    }
-
     const loadConfigs = async () => {
       loading.value = true
       try {
         const response = await axios.get('/api/kafka-datasource-config')
         if (response.data.success) {
           configs.value = response.data.data
+          testAllConnections()
         }
       } catch (error) {
-        ElMessage.error('加载配置失败')
-        // 使用模拟数据
-        configs.value = [
-          {
-            id: 1,
-            configName: '网络攻击告警Kafka源',
-            alertTypeId: 1,
-            alertTypeName: 'network_attack',
-            alertTypeLabel: '网络攻击',
-            brokers: 'kafka-1:9092,kafka-2:9092,kafka-3:9092',
-            topicName: 'network-alerts',
-            consumerGroup: 'alert-consumer-group',
-            securityProtocol: 'SASL_SSL',
-            saslMechanism: 'SCRAM-SHA-256',
-            sessionTimeout: 30000,
-            maxPollRecords: 500,
-            autoOffsetReset: 'latest',
-            dataFormat: 'json',
-            connectionStatus: 'connected',
-            isEnabled: true,
-            fieldMapping: [
-              { sourceField: 'timestamp', targetField: 'alert_time' },
-              { sourceField: 'source_ip', targetField: 'src_ip' },
-              { sourceField: 'dest_ip', targetField: 'dst_ip' }
-            ],
-            description: '网络攻击告警数据源配置',
-            createTime: '2024-01-15 10:00:00',
-            updateTime: '2024-01-23 14:30:00'
-          },
-          {
-            id: 2,
-            configName: '恶意样本告警Kafka源',
-            alertTypeId: 2,
-            alertTypeName: 'malicious_sample',
-            alertTypeLabel: '恶意样本',
-            brokers: 'kafka-1:9092,kafka-2:9092',
-            topicName: 'malware-alerts',
-            consumerGroup: 'malware-consumer-group',
-            securityProtocol: 'PLAINTEXT',
-            sessionTimeout: 60000,
-            maxPollRecords: 1000,
-            autoOffsetReset: 'earliest',
-            dataFormat: 'json',
-            connectionStatus: 'disconnected',
-            isEnabled: false,
-            fieldMapping: [
-              { sourceField: 'file_hash', targetField: 'hash_value' },
-              { sourceField: 'detection_time', targetField: 'alert_time' }
-            ],
-            description: '恶意样本检测告警数据源',
-            createTime: '2024-01-10 16:20:00',
-            updateTime: '2024-01-20 09:15:00'
-          }
-        ]
+        ElMessage.error('加载配置失败: ' + (error.response?.data?.message || error.message))
       } finally {
         loading.value = false
+      }
+    }
+
+    const testAllConnections = async () => {
+      for (const config of configs.value) {
+        if (!config.brokers || !config.topicName) {
+          config.connectionStatus = 'disconnected'
+          continue
+        }
+
+        try {
+          const testData = {
+            brokers: config.brokers,
+            topicName: config.topicName,
+            securityProtocol: config.securityProtocol || 'PLAINTEXT',
+            saslMechanism: config.saslMechanism || 'PLAIN',
+            username: config.username || '',
+            password: config.password || ''
+          }
+          const response = await axios.post('/api/kafka-datasource-config/test-connection', testData)
+          config.connectionStatus = response.data.success ? 'connected' : 'disconnected'
+        } catch (error) {
+          config.connectionStatus = 'disconnected'
+        }
       }
     }
 
@@ -445,11 +327,7 @@ export default {
           alertTypes.value = response.data.data
         }
       } catch (error) {
-        alertTypes.value = [
-          { id: 1, typeLabel: '网络攻击', typeName: 'network_attack' },
-          { id: 2, typeLabel: '恶意样本', typeName: 'malicious_sample' },
-          { id: 3, typeLabel: '主机行为', typeName: 'host_behavior' }
-        ]
+        console.error('Failed to load alert types:', error)
       }
     }
 
@@ -460,22 +338,7 @@ export default {
           alertFields.value = response.data.data
         }
       } catch (error) {
-        // 模拟数据
-        alertFields.value = {
-          1: [
-            { fieldName: 'src_ip', fieldLabel: '源IP地址' },
-            { fieldName: 'dst_ip', fieldLabel: '目标IP地址' },
-            { fieldName: 'src_port', fieldLabel: '源端口' },
-            { fieldName: 'dst_port', fieldLabel: '目标端口' },
-            { fieldName: 'alert_time', fieldLabel: '告警时间' }
-          ],
-          2: [
-            { fieldName: 'file_name', fieldLabel: '文件名' },
-            { fieldName: 'hash_value', fieldLabel: '文件哈希' },
-            { fieldName: 'file_size', fieldLabel: '文件大小' },
-            { fieldName: 'alert_time', fieldLabel: '检测时间' }
-          ]
-        }
+        console.error('Failed to load alert fields:', error)
       }
     }
 
@@ -497,10 +360,7 @@ export default {
 
     const handleEdit = (row) => {
       isEdit.value = true
-      Object.assign(form, {
-        ...row,
-        fieldMapping: row.fieldMapping || [{ sourceField: '', targetField: '' }]
-      })
+      Object.assign(form, row)
       dialogVisible.value = true
     }
 
@@ -512,35 +372,62 @@ export default {
     }
 
     const handleTest = async (row) => {
-      ElMessage.info(`正在测试Kafka连接 "${row.configName}"...`)
-      setTimeout(() => {
-        if (Math.random() > 0.3) {
+      if (!row.brokers || !row.topicName) {
+        ElMessage.error('配置数据不完整，无法测试连接')
+        return
+      }
+
+      try {
+        const response = await axios.post('/api/kafka-datasource-config/test-connection', {
+          brokers: row.brokers,
+          topicName: row.topicName,
+          securityProtocol: row.securityProtocol || 'PLAINTEXT',
+          saslMechanism: row.saslMechanism || 'PLAIN',
+          username: row.username || '',
+          password: row.password || ''
+        })
+
+        if (response.data.success) {
           ElMessage.success(`Kafka连接 "${row.configName}" 测试成功`)
           row.connectionStatus = 'connected'
         } else {
-          ElMessage.error(`Kafka连接 "${row.configName}" 测试失败`)
+          ElMessage.error(`Kafka连接 "${row.configName}" 测试失败: ${response.data.message}`)
           row.connectionStatus = 'disconnected'
         }
-      }, 2000)
+      } catch (error) {
+        ElMessage.error(`Kafka连接 "${row.configName}" 测试失败: ${error.response?.data?.message || error.message}`)
+        row.connectionStatus = 'disconnected'
+      }
     }
 
-    const handleTestConnection = () => {
-      ElMessage.info('正在测试连接...')
-      setTimeout(() => {
-        if (Math.random() > 0.3) {
+    const handleTestConnection = async () => {
+      try {
+        await formRef.value.validate()
+
+        ElMessage.info('正在测试连接...')
+        const response = await axios.post('/api/kafka-datasource-config/test-connection', {
+          brokers: form.brokers,
+          topicName: form.topicName,
+          securityProtocol: form.securityProtocol,
+          saslMechanism: form.saslMechanism,
+          username: form.username,
+          password: form.password
+        })
+
+        if (response.data.success) {
           ElMessage.success('Kafka连接测试成功')
+        } else {
+          ElMessage.error(response.data.message || '连接测试失败，请检查配置')
+        }
+      } catch (error) {
+        if (error.message) {
+          console.error('Validation error:', error)
         } else {
           ElMessage.error('连接测试失败，请检查配置')
         }
-      }, 2000)
+      }
     }
 
-    const testAllConnections = () => {
-      ElMessage.info('正在测试所有Kafka连接...')
-      setTimeout(() => {
-        ElMessage.success('连接测试完成，1个成功，1个失败')
-      }, 3000)
-    }
 
     const handleDelete = async (row) => {
       try {
@@ -573,6 +460,8 @@ export default {
     }
 
     const handleSubmit = async () => {
+      if (!formRef.value) return
+
       try {
         await formRef.value.validate()
 
@@ -590,7 +479,13 @@ export default {
           ElMessage.error(response.data.message || '保存失败')
         }
       } catch (error) {
-        ElMessage.error('请填写必填项')
+        if (error.response) {
+          ElMessage.error(error.response.data?.message || '保存失败')
+        } else if (error instanceof Error) {
+          console.error('Validation error:', error)
+        } else {
+          ElMessage.error('保存失败，请检查网络连接')
+        }
       }
     }
 
@@ -608,8 +503,6 @@ export default {
       form.sessionTimeout = 30000
       form.maxPollRecords = 500
       form.autoOffsetReset = 'latest'
-      form.dataFormat = 'json'
-      form.fieldMapping = [{ sourceField: '', targetField: '' }]
       form.description = ''
       form.isEnabled = true
       if (formRef.value) {
@@ -634,12 +527,8 @@ export default {
       alertTypes,
       form,
       rules,
-      commonKafkaFields,
-      currentAlertFields,
       getAlertTypeTagType,
       isMapped,
-      addMapping,
-      removeMapping,
       loadConfigs,
       handleAdd,
       handleRowClick,
@@ -648,7 +537,6 @@ export default {
       handleEditFromDetail,
       handleTest,
       handleTestConnection,
-      testAllConnections,
       handleDelete,
       toggleConfig,
       handleSubmit,
@@ -675,24 +563,4 @@ export default {
   margin-top: 5px;
 }
 
-.field-mapping {
-  width: 100%;
-}
-
-.mapping-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.mapping-arrow {
-  margin: 0 10px;
-  color: #409eff;
-}
-
-h4 {
-  margin-bottom: 15px;
-  color: #303133;
-  font-size: 16px;
-}
 </style>

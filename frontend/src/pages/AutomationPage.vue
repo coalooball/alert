@@ -9,255 +9,132 @@
       </template>
       <div class="automation-content">
         <el-tabs v-model="activeTab" tab-position="left" class="automation-tabs">
-          <el-tab-pane label="告警数据汇聚融合" name="data-aggregation">
+          <el-tab-pane label="告警过滤规则" name="filter-rules">
             <div class="content-panel">
-              <h3>告警数据汇聚融合</h3>
+              <h3>告警过滤规则</h3>
               <div class="section-content">
-                <el-tabs type="border-card" v-model="aggregationActiveTab">
-                  <!-- 告警过滤规则 -->
-                  <el-tab-pane label="告警过滤规则" name="filter-rules">
-                    <AlertFilterRules />
-                  </el-tab-pane>
+                <AlertFilterRules />
+              </div>
+            </div>
+          </el-tab-pane>
 
-                  <!-- 自动添加标签规则 -->
-                  <el-tab-pane label="自动添加标签规则" name="tagging-rules">
-                    <div class="rule-section">
-                      <div class="rule-header">
-                        <h4>自动添加标签规则管理</h4>
-                        <el-button type="primary" @click="handleAddTaggingRule">
-                          <el-icon><Plus /></el-icon>
-                          新增标签规则
+          <el-tab-pane label="自动添加标签规则" name="tagging-rules">
+            <div class="content-panel">
+              <h3>自动添加标签规则</h3>
+              <div class="section-content">
+                <div class="rule-section">
+                  <div class="rule-header">
+                    <h4>自动添加标签规则管理</h4>
+                    <el-button type="primary" @click="handleAddTaggingRule">
+                      <el-icon><Plus /></el-icon>
+                      新增标签规则
+                    </el-button>
+                  </div>
+
+                  <!-- 搜索过滤 -->
+                  <div class="filter-bar">
+                    <el-form :inline="true">
+                      <el-form-item label="规则名称">
+                        <el-input v-model="taggingSearch.ruleName" placeholder="搜索规则名称" clearable />
+                      </el-form-item>
+                      <el-form-item label="告警类型">
+                        <el-select v-model="taggingSearch.alertType" placeholder="选择告警类型" clearable>
+                          <el-option label="全部类型" :value="null" />
+                          <el-option label="网络攻击" :value="1" />
+                          <el-option label="恶意样本" :value="2" />
+                          <el-option label="主机行为" :value="3" />
+                        </el-select>
+                      </el-form-item>
+                      <el-form-item label="状态">
+                        <el-select v-model="taggingSearch.enabled" placeholder="选择状态" clearable>
+                          <el-option label="启用" :value="true" />
+                          <el-option label="禁用" :value="false" />
+                        </el-select>
+                      </el-form-item>
+                      <el-form-item>
+                        <el-button type="primary" @click="searchTaggingRules">搜索</el-button>
+                        <el-button @click="resetTaggingSearch">重置</el-button>
+                      </el-form-item>
+                    </el-form>
+                  </div>
+
+                  <!-- 标签规则表格 -->
+                  <el-table :data="taggingRules" stripe v-loading="taggingLoading">
+                    <el-table-column prop="ruleName" label="规则名称" />
+                    <el-table-column prop="ruleDescription" label="规则描述" show-overflow-tooltip />
+                    <el-table-column prop="alertType" label="告警类型" width="120">
+                      <template #default="scope">
+                        {{ scope.row.alertType ? getAlertTypeName(scope.row.alertType) : '全部类型' }}
+                      </template>
+                    </el-table-column>
+                    <el-table-column prop="alertSubtype" label="告警子类" width="120" />
+                    <el-table-column prop="matchField" label="匹配字段" width="120" />
+                    <el-table-column prop="matchType" label="匹配类型" width="100">
+                      <template #default="scope">
+                        <el-tag :type="scope.row.matchType === 'regex' ? 'warning' : 'primary'" size="small">
+                          {{ scope.row.matchType === 'regex' ? '正则匹配' : '精确匹配' }}
+                        </el-tag>
+                      </template>
+                    </el-table-column>
+                    <el-table-column prop="matchValue" label="匹配值" width="150" show-overflow-tooltip />
+                    <el-table-column prop="tags" label="标签" width="180">
+                      <template #default="scope">
+                        <el-tag
+                          v-for="tag in scope.row.tags.slice(0, 3)"
+                          :key="tag"
+                          size="small"
+                          style="margin-right: 5px; margin-bottom: 5px"
+                        >
+                          {{ tag }}
+                        </el-tag>
+                        <el-tag v-if="scope.row.tags.length > 3" size="small" type="info">
+                          +{{ scope.row.tags.length - 3 }}
+                        </el-tag>
+                      </template>
+                    </el-table-column>
+                    <el-table-column prop="priority" label="优先级" width="100">
+                      <template #default="scope">
+                        <el-tag :type="getPriorityType(scope.row.priority)">
+                          {{ scope.row.priority }}
+                        </el-tag>
+                      </template>
+                    </el-table-column>
+                    <el-table-column prop="isEnabled" label="状态" width="80">
+                      <template #default="scope">
+                        <el-switch
+                          v-model="scope.row.isEnabled"
+                          @change="toggleTaggingRule(scope.row)"
+                        />
+                      </template>
+                    </el-table-column>
+                    <el-table-column label="操作" width="200" fixed="right">
+                      <template #default="scope">
+                        <el-button size="small" type="primary" @click="handleEditTaggingRule(scope.row)">
+                          编辑
                         </el-button>
-                      </div>
+                        <el-button size="small" type="danger" @click="handleDeleteTaggingRule(scope.row)">
+                          删除
+                        </el-button>
+                      </template>
+                    </el-table-column>
+                  </el-table>
 
-                      <!-- 搜索过滤 -->
-                      <div class="filter-bar">
-                        <el-form :inline="true">
-                          <el-form-item label="规则名称">
-                            <el-input v-model="taggingSearch.ruleName" placeholder="搜索规则名称" clearable />
-                          </el-form-item>
-                          <el-form-item label="告警类型">
-                            <el-select v-model="taggingSearch.alertType" placeholder="选择告警类型" clearable>
-                              <el-option label="全部类型" :value="null" />
-                              <el-option label="网络攻击" :value="1" />
-                              <el-option label="恶意样本" :value="2" />
-                              <el-option label="主机行为" :value="3" />
-                            </el-select>
-                          </el-form-item>
-                          <el-form-item label="状态">
-                            <el-select v-model="taggingSearch.enabled" placeholder="选择状态" clearable>
-                              <el-option label="启用" :value="true" />
-                              <el-option label="禁用" :value="false" />
-                            </el-select>
-                          </el-form-item>
-                          <el-form-item>
-                            <el-button type="primary" @click="searchTaggingRules">搜索</el-button>
-                            <el-button @click="resetTaggingSearch">重置</el-button>
-                          </el-form-item>
-                        </el-form>
-                      </div>
-
-                      <!-- 标签规则表格 -->
-                      <el-table :data="taggingRules" stripe v-loading="taggingLoading">
-                        <el-table-column prop="ruleName" label="规则名称" />
-                        <el-table-column prop="ruleDescription" label="规则描述" show-overflow-tooltip />
-                        <el-table-column prop="alertType" label="告警类型" width="120">
-                          <template #default="scope">
-                            {{ scope.row.alertType ? getAlertTypeName(scope.row.alertType) : '全部类型' }}
-                          </template>
-                        </el-table-column>
-                        <el-table-column prop="alertSubtype" label="告警子类" width="120" />
-                        <el-table-column prop="matchField" label="匹配字段" width="120" />
-                        <el-table-column prop="matchType" label="匹配类型" width="100">
-                          <template #default="scope">
-                            <el-tag :type="scope.row.matchType === 'regex' ? 'warning' : 'primary'" size="small">
-                              {{ scope.row.matchType === 'regex' ? '正则匹配' : '精确匹配' }}
-                            </el-tag>
-                          </template>
-                        </el-table-column>
-                        <el-table-column prop="matchValue" label="匹配值" width="150" show-overflow-tooltip />
-                        <el-table-column prop="tags" label="标签" width="180">
-                          <template #default="scope">
-                            <el-tag
-                              v-for="tag in scope.row.tags.slice(0, 3)"
-                              :key="tag"
-                              size="small"
-                              style="margin-right: 5px; margin-bottom: 5px"
-                            >
-                              {{ tag }}
-                            </el-tag>
-                            <el-tag v-if="scope.row.tags.length > 3" size="small" type="info">
-                              +{{ scope.row.tags.length - 3 }}
-                            </el-tag>
-                          </template>
-                        </el-table-column>
-                        <el-table-column prop="priority" label="优先级" width="100">
-                          <template #default="scope">
-                            <el-tag :type="getPriorityType(scope.row.priority)">
-                              {{ scope.row.priority }}
-                            </el-tag>
-                          </template>
-                        </el-table-column>
-                        <el-table-column prop="isEnabled" label="状态" width="80">
-                          <template #default="scope">
-                            <el-switch
-                              v-model="scope.row.isEnabled"
-                              @change="toggleTaggingRule(scope.row)"
-                            />
-                          </template>
-                        </el-table-column>
-                        <el-table-column label="操作" width="200" fixed="right">
-                          <template #default="scope">
-                            <el-button size="small" type="primary" @click="handleEditTaggingRule(scope.row)">
-                              编辑
-                            </el-button>
-                            <el-button size="small" type="danger" @click="handleDeleteTaggingRule(scope.row)">
-                              删除
-                            </el-button>
-                          </template>
-                        </el-table-column>
-                      </el-table>
-
-                      <!-- 分页 -->
-                      <el-pagination
-                        v-model:current-page="taggingPagination.currentPage"
-                        v-model:page-size="taggingPagination.pageSize"
-                        :page-sizes="[10, 20, 50, 100]"
-                        :total="taggingPagination.total"
-                        layout="total, sizes, prev, pager, next, jumper"
-                        @size-change="handleTaggingPageSizeChange"
-                        @current-change="handleTaggingPageChange"
-                        style="margin-top: 20px; justify-content: center"
-                      />
-                    </div>
-                  </el-tab-pane>
-                </el-tabs>
+                  <!-- 分页 -->
+                  <el-pagination
+                    v-model:current-page="taggingPagination.currentPage"
+                    v-model:page-size="taggingPagination.pageSize"
+                    :page-sizes="[10, 20, 50, 100]"
+                    :total="taggingPagination.total"
+                    layout="total, sizes, prev, pager, next, jumper"
+                    @size-change="handleTaggingPageSizeChange"
+                    @current-change="handleTaggingPageChange"
+                    style="margin-top: 20px; justify-content: center"
+                  />
+                </div>
               </div>
             </div>
           </el-tab-pane>
 
-          <el-tab-pane label="告警数据智能处理" name="intelligent-processing">
-            <div class="content-panel">
-              <h3>告警数据智能处理</h3>
-              <div class="section-content">
-                <el-tabs type="border-card" v-model="processingActiveTab">
-                  <!-- 收敛规则 -->
-                  <el-tab-pane label="收敛规则" name="convergence-rules">
-                    <AlertConvergenceRules />
-                  </el-tab-pane>
-
-                  <!-- 智能模型管理 -->
-                  <el-tab-pane label="智能模型管理" name="model-management">
-                    <IntelligentModelManagement />
-                  </el-tab-pane>
-                </el-tabs>
-              </div>
-            </div>
-          </el-tab-pane>
-
-          <el-tab-pane label="告警数据智能分析" name="intelligent-analysis">
-            <div class="content-panel">
-              <h3>告警数据智能分析</h3>
-              <div class="section-content">
-                <el-tabs type="border-card" v-model="analysisActiveTab">
-                  <!-- 关联剧本 -->
-                  <el-tab-pane label="关联剧本" name="playbooks">
-                    <AssociatedPlaybooks />
-                  </el-tab-pane>
-
-                  <!-- 关联规则 -->
-                  <el-tab-pane label="关联规则" name="rules">
-                    <AssociatedRules />
-                  </el-tab-pane>
-
-                  <!-- 威胁情报配置 -->
-                  <el-tab-pane label="威胁情报配置" name="threat-intelligence">
-                    <ThreatIntelligenceConfig />
-                  </el-tab-pane>
-
-                  <!-- 智能模型配置 -->
-                  <el-tab-pane label="智能模型配置" name="ai-models">
-                    <AIModelConfig />
-                  </el-tab-pane>
-                </el-tabs>
-              </div>
-            </div>
-          </el-tab-pane>
-
-          <el-tab-pane label="威胁事件审核" name="threat-review">
-            <div class="content-panel">
-              <h3>威胁事件审核</h3>
-              <div class="section-content">
-                <el-row :gutter="20">
-                  <el-col :span="24">
-                    <div class="info-card">
-                      <h4>待审核事件列表</h4>
-                      <div class="filter-bar">
-                        <el-form :inline="true">
-                          <el-form-item label="威胁等级">
-                            <el-select v-model="threatLevelFilter" placeholder="全部">
-                              <el-option label="全部" value="" />
-                              <el-option label="严重" value="critical" />
-                              <el-option label="高危" value="high" />
-                              <el-option label="中危" value="medium" />
-                              <el-option label="低危" value="low" />
-                            </el-select>
-                          </el-form-item>
-                          <el-form-item label="状态">
-                            <el-select v-model="reviewStatusFilter" placeholder="全部">
-                              <el-option label="全部" value="" />
-                              <el-option label="待审核" value="pending" />
-                              <el-option label="审核中" value="reviewing" />
-                              <el-option label="已确认" value="confirmed" />
-                              <el-option label="已忽略" value="ignored" />
-                            </el-select>
-                          </el-form-item>
-                          <el-form-item>
-                            <el-button type="primary">搜索</el-button>
-                            <el-button>重置</el-button>
-                          </el-form-item>
-                        </el-form>
-                      </div>
-                      <el-table :data="threatEvents" stripe>
-                        <el-table-column type="selection" width="55" />
-                        <el-table-column prop="id" label="事件ID" width="100" />
-                        <el-table-column prop="name" label="事件名称" />
-                        <el-table-column prop="type" label="威胁类型" />
-                        <el-table-column prop="level" label="威胁等级" width="100">
-                          <template #default="scope">
-                            <el-tag :type="getThreatLevelType(scope.row.level)">
-                              {{ scope.row.level }}
-                            </el-tag>
-                          </template>
-                        </el-table-column>
-                        <el-table-column prop="source" label="来源" />
-                        <el-table-column prop="time" label="发生时间" width="160" />
-                        <el-table-column prop="status" label="审核状态" width="100">
-                          <template #default="scope">
-                            <el-tag :type="getReviewStatusType(scope.row.status)">
-                              {{ scope.row.status }}
-                            </el-tag>
-                          </template>
-                        </el-table-column>
-                        <el-table-column label="操作" width="200" fixed="right">
-                          <template #default>
-                            <el-button size="small" type="primary">审核</el-button>
-                            <el-button size="small" type="success">确认</el-button>
-                            <el-button size="small" type="warning">忽略</el-button>
-                          </template>
-                        </el-table-column>
-                      </el-table>
-                      <div class="batch-operations">
-                        <el-button type="primary">批量确认</el-button>
-                        <el-button type="warning">批量忽略</el-button>
-                        <el-button>导出报告</el-button>
-                      </div>
-                    </div>
-                  </el-col>
-                </el-row>
-              </div>
-            </div>
-          </el-tab-pane>
 
           <el-tab-pane label="标签管理" name="tag-management">
             <div class="content-panel">
@@ -588,12 +465,6 @@
 <script>
 import { Setting, Document, Operation, List, Plus, Delete } from '@element-plus/icons-vue'
 import AlertFilterRules from '../components/AlertFilterRules.vue'
-import AlertConvergenceRules from '../components/AlertConvergenceRules.vue'
-import IntelligentModelManagement from '../components/IntelligentModelManagement.vue'
-import AssociatedPlaybooks from '../components/AssociatedPlaybooks.vue'
-import AssociatedRules from '../components/AssociatedRules.vue'
-import ThreatIntelligenceConfig from '../components/ThreatIntelligenceConfig.vue'
-import AIModelConfig from '../components/AIModelConfig.vue'
 
 export default {
   name: 'AutomationPage',
@@ -604,19 +475,11 @@ export default {
     List,
     Plus,
     Delete,
-    AlertFilterRules,
-    AlertConvergenceRules,
-    IntelligentModelManagement,
-    AssociatedPlaybooks,
-    AssociatedRules,
-    ThreatIntelligenceConfig,
-    AIModelConfig
+    AlertFilterRules
   },
   data() {
     return {
-      activeTab: 'data-aggregation',
-      // 告警数据汇聚融合
-      aggregationActiveTab: 'filter-rules',
+      activeTab: 'filter-rules',
       dataSources: [
         { name: 'IDS系统', type: '入侵检测', status: '在线' },
         { name: 'WAF防火墙', type: 'Web防护', status: '在线' },
@@ -625,13 +488,6 @@ export default {
       ],
       timeWindow: 5,
       similarityThreshold: 80,
-
-      // 告警数据智能处理
-      processingActiveTab: 'convergence-rules',
-
-      // 告警数据智能分析
-      analysisActiveTab: 'playbooks',
-
 
       // 标签规则相关
       taggingRules: [],
@@ -694,56 +550,6 @@ export default {
       alertTypes: [],
       subtypeOptions: {},
       fieldOptions: {},
-
-      // 告警数据智能分析
-      correlationWindow: 30,
-      minCorrelation: 0.7,
-      trendPeriod: 'daily',
-      predictionModel: 'lstm',
-      anomalyAlgorithm: 'isolation-forest',
-      anomalySensitivity: 7,
-
-      // 威胁事件审核
-      threatLevelFilter: '',
-      reviewStatusFilter: '',
-      threatEvents: [
-        {
-          id: 'THR001',
-          name: 'SQL注入攻击',
-          type: 'Web攻击',
-          level: '严重',
-          source: 'WAF防火墙',
-          time: '2024-01-23 10:30:45',
-          status: '待审核'
-        },
-        {
-          id: 'THR002',
-          name: '暴力破解尝试',
-          type: '认证攻击',
-          level: '高危',
-          source: 'IDS系统',
-          time: '2024-01-23 10:25:12',
-          status: '审核中'
-        },
-        {
-          id: 'THR003',
-          name: '异常流量检测',
-          type: 'DDoS攻击',
-          level: '中危',
-          source: '日志采集器',
-          time: '2024-01-23 10:20:08',
-          status: '已确认'
-        },
-        {
-          id: 'THR004',
-          name: '恶意文件上传',
-          type: '文件攻击',
-          level: '高危',
-          source: '终端防护',
-          time: '2024-01-23 10:15:33',
-          status: '待审核'
-        }
-      ],
 
       // 标签管理相关
       tags: [],
@@ -904,24 +710,6 @@ export default {
         '低': 'info'
       }
       return typeMap[priority] || 'info'
-    },
-    getThreatLevelType(level) {
-      const typeMap = {
-        '严重': 'danger',
-        '高危': 'warning',
-        '中危': 'primary',
-        '低危': 'info'
-      }
-      return typeMap[level] || 'info'
-    },
-    getReviewStatusType(status) {
-      const typeMap = {
-        '待审核': 'warning',
-        '审核中': 'primary',
-        '已确认': 'success',
-        '已忽略': 'info'
-      }
-      return typeMap[status] || 'info'
     },
     getProgressColor(percentage) {
       if (percentage < 60) return '#f56c6c'

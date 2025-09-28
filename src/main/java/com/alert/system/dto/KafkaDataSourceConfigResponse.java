@@ -1,94 +1,62 @@
-package com.alert.system.entity;
+package com.alert.system.dto;
 
-import jakarta.persistence.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import com.alert.system.entity.KafkaDataSourceConfig;
 import java.time.LocalDateTime;
-import java.util.List;
 
-@Entity
-@Table(name = "kafka_datasource_config")
-public class KafkaDataSourceConfig {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class KafkaDataSourceConfigResponse {
     private Long id;
-
-    @Column(name = "config_name", nullable = false, length = 200)
     private String configName;
-
-    @Column(name = "alert_type_id", nullable = false)
     private Long alertTypeId;
-
-    @Column(name = "brokers", nullable = false, length = 1000)
+    private String alertTypeName;
+    private String alertTypeLabel;
     private String brokers;
-
-    @Column(name = "topic_name", nullable = false, length = 200)
     private String topicName;
-
-    @Column(name = "consumer_group", nullable = false, length = 200)
     private String consumerGroup;
-
-    @Column(name = "security_protocol", length = 50)
-    private String securityProtocol = "PLAINTEXT";
-
-    @Column(name = "sasl_mechanism", length = 50)
+    private String securityProtocol;
     private String saslMechanism;
-
-    @Column(name = "username", length = 200)
     private String username;
-
-    @Column(name = "password", length = 500)
-    private String password;
-
-    @Column(name = "session_timeout")
-    private Integer sessionTimeout = 30000;
-
-    @Column(name = "max_poll_records")
-    private Integer maxPollRecords = 500;
-
-    @Column(name = "auto_offset_reset", length = 50)
-    private String autoOffsetReset = "latest";
-
-    @Column(name = "data_format", nullable = false, length = 50)
-    private String dataFormat = "json";
-
-    @Column(name = "field_mapping", columnDefinition = "JSON")
-    @JdbcTypeCode(SqlTypes.JSON)
+    private Integer sessionTimeout;
+    private Integer maxPollRecords;
+    private String autoOffsetReset;
+    private String dataFormat;
     private String fieldMapping;
-
-    @Column(name = "description", length = 1000)
     private String description;
-
-    @Column(name = "is_enabled", nullable = false)
-    private Boolean isEnabled = true;
-
-    @Column(name = "connection_status", length = 50)
-    private String connectionStatus = "unknown";
-
-    @Column(name = "created_by", length = 100)
+    private Boolean isEnabled;
+    private String connectionStatus;
     private String createdBy;
-
-    @Column(name = "create_time", nullable = false)
     private LocalDateTime createTime;
-
-    @Column(name = "update_time", nullable = false)
     private LocalDateTime updateTime;
 
-    // 关联alert_types表
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "alert_type_id", insertable = false, updatable = false)
-    private AlertType alertType;
+    public static KafkaDataSourceConfigResponse fromEntity(KafkaDataSourceConfig config) {
+        KafkaDataSourceConfigResponse response = new KafkaDataSourceConfigResponse();
+        response.setId(config.getId());
+        response.setConfigName(config.getConfigName());
+        response.setAlertTypeId(config.getAlertTypeId());
 
-    @PrePersist
-    protected void onCreate() {
-        LocalDateTime now = LocalDateTime.now();
-        createTime = now;
-        updateTime = now;
-    }
+        if (config.getAlertType() != null) {
+            response.setAlertTypeName(config.getAlertType().getTypeName());
+            response.setAlertTypeLabel(config.getAlertType().getTypeLabel());
+        }
 
-    @PreUpdate
-    protected void onUpdate() {
-        updateTime = LocalDateTime.now();
+        response.setBrokers(config.getBrokers());
+        response.setTopicName(config.getTopicName());
+        response.setConsumerGroup(config.getConsumerGroup());
+        response.setSecurityProtocol(config.getSecurityProtocol());
+        response.setSaslMechanism(config.getSaslMechanism());
+        response.setUsername(config.getUsername());
+        response.setSessionTimeout(config.getSessionTimeout());
+        response.setMaxPollRecords(config.getMaxPollRecords());
+        response.setAutoOffsetReset(config.getAutoOffsetReset());
+        response.setDataFormat(config.getDataFormat());
+        response.setFieldMapping(config.getFieldMapping());
+        response.setDescription(config.getDescription());
+        response.setIsEnabled(config.getIsEnabled());
+        response.setConnectionStatus(config.getConnectionStatus());
+        response.setCreatedBy(config.getCreatedBy());
+        response.setCreateTime(config.getCreateTime());
+        response.setUpdateTime(config.getUpdateTime());
+
+        return response;
     }
 
     // Getters and Setters
@@ -114,6 +82,22 @@ public class KafkaDataSourceConfig {
 
     public void setAlertTypeId(Long alertTypeId) {
         this.alertTypeId = alertTypeId;
+    }
+
+    public String getAlertTypeName() {
+        return alertTypeName;
+    }
+
+    public void setAlertTypeName(String alertTypeName) {
+        this.alertTypeName = alertTypeName;
+    }
+
+    public String getAlertTypeLabel() {
+        return alertTypeLabel;
+    }
+
+    public void setAlertTypeLabel(String alertTypeLabel) {
+        this.alertTypeLabel = alertTypeLabel;
     }
 
     public String getBrokers() {
@@ -162,14 +146,6 @@ public class KafkaDataSourceConfig {
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public Integer getSessionTimeout() {
@@ -258,13 +234,5 @@ public class KafkaDataSourceConfig {
 
     public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
-    }
-
-    public AlertType getAlertType() {
-        return alertType;
-    }
-
-    public void setAlertType(AlertType alertType) {
-        this.alertType = alertType;
     }
 }

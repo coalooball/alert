@@ -89,5 +89,7 @@ server.log
 *.backup
 *.old
 
+# Mock data - ignore large JSON files
+mock/*.json
 
 prompt.txt

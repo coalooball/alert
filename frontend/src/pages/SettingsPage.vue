@@ -28,6 +28,9 @@
           <el-tab-pane label="告警数据来源配置" name="dataSource">
             <AlertDataSourceConfig />
           </el-tab-pane>
+          <el-tab-pane label="恢复默认配置" name="defaultConfig">
+            <DefaultConfigManagement />
+          </el-tab-pane>
         </el-tabs>
       </div>
     </el-card>
@@ -42,6 +45,7 @@ import ComputeEngine from '../views/ComputeEngine.vue'
 import AlertDataTypeConfig from '../components/AlertDataTypeConfig.vue'
 import DataStorageConfigTabs from '../components/DataStorageConfigTabs.vue'
 import AlertDataSourceConfig from '../components/AlertDataSourceConfig.vue'
+import DefaultConfigManagement from '../components/DefaultConfigManagement.vue'
 
 export default {
   name: 'SettingsPage',
@@ -52,7 +56,8 @@ export default {
     ComputeEngine,
     AlertDataTypeConfig,
     DataStorageConfigTabs,
-    AlertDataSourceConfig
+    AlertDataSourceConfig,
+    DefaultConfigManagement
   },
   data() {
     return {

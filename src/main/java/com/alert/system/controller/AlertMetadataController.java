@@ -44,6 +44,24 @@ public class AlertMetadataController {
         return ResponseEntity.ok(alertFieldRepository.findByAlertTypeIdAndIsActiveTrueOrderByDisplayOrderAsc(typeId));
     }
 
+    @GetMapping("/fields")
+    @Transactional(readOnly = true)
+    public ResponseEntity<Map<String, Object>> getAllFields() {
+        Map<String, Object> response = new HashMap<>();
+
+        List<AlertType> types = alertTypeRepository.findByIsActiveTrueOrderByDisplayOrderAsc();
+        Map<Integer, List<AlertField>> fieldsByType = new HashMap<>();
+
+        for (AlertType type : types) {
+            fieldsByType.put(type.getId(),
+                alertFieldRepository.findByAlertTypeIdAndIsActiveTrueOrderByDisplayOrderAsc(type.getId()));
+        }
+
+        response.put("success", true);
+        response.put("data", fieldsByType);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/all")
     @Transactional(readOnly = true)
     public ResponseEntity<Map<String, Object>> getAllMetadata() {

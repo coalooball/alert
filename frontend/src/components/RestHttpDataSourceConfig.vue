@@ -9,10 +9,6 @@
         <el-icon><Refresh /></el-icon>
         刷新
       </el-button>
-      <el-button @click="testAllConnections">
-        <el-icon><Connection /></el-icon>
-        测试所有接口
-      </el-button>
     </div>
 
     <el-table :data="configs" v-loading="loading" stripe border @row-click="handleRowClick">
@@ -24,18 +20,10 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="endpointPath" label="接口路径" min-width="200" show-overflow-tooltip />
-      <el-table-column prop="method" label="请求方法" width="80">
+      <el-table-column prop="endpointPath" label="接口路径" min-width="250" show-overflow-tooltip />
+      <el-table-column prop="method" label="请求方法" width="100">
         <template #default="{ row }">
           <el-tag :type="getMethodTagType(row.method)">{{ row.method }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column prop="rateLimitEnabled" label="限流设置" width="120" align="center">
-        <template #default="{ row }">
-          <el-tag v-if="row.rateLimitEnabled" type="warning">
-            {{ row.rateLimitRequests }}/{{ row.rateLimitWindow }}s
-          </el-tag>
-          <el-tag v-else type="info">无限制</el-tag>
         </template>
       </el-table-column>
       <el-table-column prop="connectionStatus" label="连接状态" width="100" align="center">
@@ -103,96 +91,6 @@
           <div class="form-tip">固定为POST方法，用于接收告警数据</div>
         </el-form-item>
 
-        <el-form-item label="认证方式" prop="authType">
-          <el-select v-model="form.authType" placeholder="请选择认证方式" style="width: 100%">
-            <el-option label="无认证" value="none" />
-            <el-option label="API Key" value="apikey" />
-            <el-option label="Bearer Token" value="bearer" />
-            <el-option label="Basic Auth" value="basic" />
-            <el-option label="OAuth 2.0" value="oauth" />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item v-if="form.authType === 'apikey'" label="API Key配置">
-          <el-row :gutter="20">
-            <el-col :span="12">
-              <el-input v-model="form.apiKeyName" placeholder="参数名 (如: X-API-Key)" />
-            </el-col>
-            <el-col :span="12">
-              <el-input v-model="form.apiKeyValue" type="password" placeholder="API Key值" show-password />
-            </el-col>
-          </el-row>
-        </el-form-item>
-
-        <el-form-item v-if="form.authType === 'bearer'" label="Bearer Token" prop="bearerToken">
-          <el-input v-model="form.bearerToken" type="password" placeholder="请输入Bearer Token" show-password />
-        </el-form-item>
-
-        <el-form-item v-if="form.authType === 'basic'" label="Basic认证">
-          <el-row :gutter="20">
-            <el-col :span="12">
-              <el-input v-model="form.basicUsername" placeholder="用户名" />
-            </el-col>
-            <el-col :span="12">
-              <el-input v-model="form.basicPassword" type="password" placeholder="密码" show-password />
-            </el-col>
-          </el-row>
-        </el-form-item>
-
-        <el-form-item label="请求头设置">
-          <div class="headers-config">
-            <div v-for="(header, index) in form.headers" :key="index" class="header-item">
-              <el-input v-model="header.key" placeholder="Header名称" style="width: 200px" />
-              <el-input v-model="header.value" placeholder="Header值" style="width: 300px; margin-left: 10px" />
-              <el-button type="danger" size="small" @click="removeHeader(index)" style="margin-left: 10px">
-                <el-icon><Delete /></el-icon>
-              </el-button>
-            </div>
-            <el-button type="primary" size="small" @click="addHeader">
-              <el-icon><Plus /></el-icon>
-              添加请求头
-            </el-button>
-          </div>
-        </el-form-item>
-
-        <el-form-item label="数据验证">
-          <el-input
-            v-model="form.dataValidation"
-            type="textarea"
-            :rows="3"
-            placeholder="JSON Schema或验证规则，用于验证接收的告警数据格式"
-          />
-          <div class="form-tip">可选：定义JSON Schema来验证接收的数据格式</div>
-        </el-form-item>
-
-        <el-form-item label="限流配置">
-          <el-row :gutter="20">
-            <el-col :span="8">
-              <el-switch v-model="form.rateLimitEnabled" active-text="启用限流" inactive-text="不限流" />
-            </el-col>
-            <el-col :span="8" v-if="form.rateLimitEnabled">
-              <el-input-number
-                v-model="form.rateLimitRequests"
-                :min="1"
-                :max="10000"
-                placeholder="请求数量"
-                style="width: 100%"
-              />
-              <div class="form-tip">最大请求数</div>
-            </el-col>
-            <el-col :span="8" v-if="form.rateLimitEnabled">
-              <el-input-number
-                v-model="form.rateLimitWindow"
-                :min="1"
-                :max="3600"
-                placeholder="时间窗口"
-                style="width: 100%"
-              />
-              <div class="form-tip">时间窗口(秒)</div>
-            </el-col>
-          </el-row>
-        </el-form-item>
-
         <el-form-item label="字段映射" v-if="form.alertTypeId">
           <div class="field-mapping">
             <div class="form-tip" style="margin-bottom: 10px">
@@ -253,12 +151,7 @@
         <el-descriptions-item label="请求方法">
           <el-tag :type="getMethodTagType(detailData.method)">{{ detailData.method }}</el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="认证方式">{{ detailData.authType || '无认证' }}</el-descriptions-item>
-        <el-descriptions-item label="拉取间隔">{{ detailData.pollInterval }}秒</el-descriptions-item>
-        <el-descriptions-item label="请求超时">{{ detailData.timeout }}秒</el-descriptions-item>
-        <el-descriptions-item label="重试次数">{{ detailData.maxRetries }}</el-descriptions-item>
-        <el-descriptions-item label="响应格式">{{ detailData.responseFormat }}</el-descriptions-item>
-        <el-descriptions-item label="数据路径">{{ detailData.dataPath || '根路径' }}</el-descriptions-item>
+        <el-descriptions-item label="接口地址" :span="2">{{ detailData.endpointPath }}</el-descriptions-item>
         <el-descriptions-item label="连接状态">
           <el-tag :type="detailData.connectionStatus === 'connected' ? 'success' : 'danger'">
             {{ detailData.connectionStatus === 'connected' ? '正常' : '异常' }}
@@ -269,19 +162,10 @@
             {{ detailData.isEnabled ? '已启用' : '已禁用' }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="接口地址" :span="2">{{ detailData.endpoint }}</el-descriptions-item>
         <el-descriptions-item label="描述" :span="2">{{ detailData.description || '暂无描述' }}</el-descriptions-item>
         <el-descriptions-item label="创建时间">{{ detailData.createTime }}</el-descriptions-item>
         <el-descriptions-item label="更新时间">{{ detailData.updateTime }}</el-descriptions-item>
       </el-descriptions>
-
-      <div v-if="detailData && detailData.headers && detailData.headers.length" style="margin-top: 20px">
-        <h4>请求头配置</h4>
-        <el-table :data="detailData.headers" border size="small">
-          <el-table-column prop="key" label="Header名称" />
-          <el-table-column prop="value" label="Header值" />
-        </el-table>
-      </div>
 
       <div v-if="detailData && detailData.fieldMapping && detailData.fieldMapping.length" style="margin-top: 20px">
         <h4>字段映射</h4>
@@ -302,12 +186,12 @@
 <script>
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Refresh, Connection, Right, Delete } from '@element-plus/icons-vue'
+import { Plus, Refresh, Right, Delete } from '@element-plus/icons-vue'
 import axios from 'axios'
 
 export default {
   name: 'RestHttpDataSourceConfig',
-  components: { Plus, Refresh, Connection, Right, Delete },
+  components: { Plus, Refresh, Right, Delete },
   setup() {
     const configs = ref([])
     const loading = ref(false)
@@ -328,17 +212,6 @@ export default {
       endpointPath: '',
       method: 'POST',
       authType: 'none',
-      apiKeyName: '',
-      apiKeyValue: '',
-      bearerToken: '',
-      basicUsername: '',
-      basicPassword: '',
-      customHeaders: [{ key: '', value: '' }],
-      contentType: 'application/json',
-      dataValidation: '',
-      rateLimitEnabled: false,
-      rateLimitRequests: 100,
-      rateLimitWindow: 60,
       fieldMapping: [{ sourceField: '', targetField: '' }],
       description: '',
       isEnabled: true
@@ -390,16 +263,6 @@ export default {
       return configs.value.some(c => c.alertTypeId === alertTypeId && c.id !== form.id)
     }
 
-    const addHeader = () => {
-      form.customHeaders.push({ key: '', value: '' })
-    }
-
-    const removeHeader = (index) => {
-      if (form.customHeaders.length > 1) {
-        form.customHeaders.splice(index, 1)
-      }
-    }
-
     const addMapping = () => {
       form.fieldMapping.push({ sourceField: '', targetField: '' })
     }
@@ -416,71 +279,33 @@ export default {
         const response = await axios.get('/api/rest-http-datasource-config')
         if (response.data.success) {
           configs.value = response.data.data
+          testAllConnections()
         }
       } catch (error) {
-        ElMessage.error('加载配置失败')
-        // 使用模拟数据
-        configs.value = [
-          {
-            id: 1,
-            configName: '网络攻击告警接收接口',
-            alertTypeId: 1,
-            alertTypeName: 'network_attack',
-            alertTypeLabel: '网络攻击',
-            endpointPath: '/api/alerts/network-attack',
-            method: 'POST',
-            authType: 'bearer',
-            bearerToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-            contentType: 'application/json',
-            rateLimitEnabled: true,
-            rateLimitRequests: 1000,
-            rateLimitWindow: 60,
-            connectionStatus: 'connected',
-            isEnabled: true,
-            customHeaders: [
-              { key: 'Content-Type', value: 'application/json' },
-              { key: 'User-Agent', value: 'AlertSystem/1.0' }
-            ],
-            fieldMapping: [
-              { sourceField: 'timestamp', targetField: 'alert_time' },
-              { sourceField: 'source_ip', targetField: 'src_ip' },
-              { sourceField: 'target_ip', targetField: 'dst_ip' }
-            ],
-            dataValidation: '{"type":"object","required":["timestamp","source_ip"],"properties":{"timestamp":{"type":"string"},"source_ip":{"type":"string","format":"ipv4"}}}',
-            description: '用于接收网络攻击类型的告警数据',
-            createTime: '2024-01-18 14:30:00',
-            updateTime: '2024-01-23 16:45:00'
-          },
-          {
-            id: 2,
-            configName: '主机行为告警接收接口',
-            alertTypeId: 3,
-            alertTypeName: 'host_behavior',
-            alertTypeLabel: '主机行为',
-            endpointPath: '/api/alerts/host-behavior',
-            method: 'POST',
-            authType: 'apikey',
-            apiKeyName: 'X-API-Key',
-            apiKeyValue: 'sk_test_123456789',
-            contentType: 'application/json',
-            rateLimitEnabled: false,
-            connectionStatus: 'disconnected',
-            isEnabled: false,
-            customHeaders: [
-              { key: 'Content-Type', value: 'application/json' }
-            ],
-            fieldMapping: [
-              { sourceField: 'event_time', targetField: 'alert_time' },
-              { sourceField: 'host_name', targetField: 'hostname' }
-            ],
-            dataValidation: '',
-            description: '用于接收主机行为异常的告警数据',
-            createTime: '2024-01-12 11:20:00',
-            updateTime: '2024-01-22 09:30:00'
-          }
-        ]
+        ElMessage.error('加载配置失败: ' + (error.response?.data?.message || error.message))
       } finally {
         loading.value = false
+      }
+    }
+
+    const testAllConnections = async () => {
+      for (const config of configs.value) {
+        if (!config.endpointPath) {
+          config.connectionStatus = 'disconnected'
+          continue
+        }
+
+        try {
+          const fullUrl = baseUrl.value + config.endpointPath
+          const response = await axios.post('/api/rest-http-datasource-config/test-connection', {
+            endpointPath: fullUrl,
+            method: config.method || 'POST',
+            authType: config.authType || 'none'
+          })
+          config.connectionStatus = response.data.success ? 'connected' : 'disconnected'
+        } catch (error) {
+          config.connectionStatus = 'disconnected'
+        }
       }
     }
 
@@ -491,11 +316,7 @@ export default {
           alertTypes.value = response.data.data
         }
       } catch (error) {
-        alertTypes.value = [
-          { id: 1, typeLabel: '网络攻击', typeName: 'network_attack' },
-          { id: 2, typeLabel: '恶意样本', typeName: 'malicious_sample' },
-          { id: 3, typeLabel: '主机行为', typeName: 'host_behavior' }
-        ]
+        console.error('Failed to load alert types:', error)
       }
     }
 
@@ -506,22 +327,7 @@ export default {
           alertFields.value = response.data.data
         }
       } catch (error) {
-        // 模拟数据
-        alertFields.value = {
-          1: [
-            { fieldName: 'src_ip', fieldLabel: '源IP地址' },
-            { fieldName: 'dst_ip', fieldLabel: '目标IP地址' },
-            { fieldName: 'src_port', fieldLabel: '源端口' },
-            { fieldName: 'dst_port', fieldLabel: '目标端口' },
-            { fieldName: 'alert_time', fieldLabel: '告警时间' }
-          ],
-          3: [
-            { fieldName: 'hostname', fieldLabel: '主机名' },
-            { fieldName: 'process_name', fieldLabel: '进程名' },
-            { fieldName: 'user_name', fieldLabel: '用户名' },
-            { fieldName: 'alert_time', fieldLabel: '告警时间' }
-          ]
-        }
+        console.error('Failed to load alert fields:', error)
       }
     }
 
@@ -545,7 +351,6 @@ export default {
       isEdit.value = true
       Object.assign(form, {
         ...row,
-        headers: row.headers || [{ key: '', value: '' }],
         fieldMapping: row.fieldMapping || [{ sourceField: '', targetField: '' }]
       })
       dialogVisible.value = true
@@ -559,35 +364,62 @@ export default {
     }
 
     const handleTest = async (row) => {
-      ElMessage.info(`正在测试HTTP接口 "${row.configName}"...`)
-      setTimeout(() => {
-        if (Math.random() > 0.3) {
+      if (!row.endpointPath) {
+        ElMessage.error('配置数据不完整，无法测试连接')
+        return
+      }
+
+      try {
+        const fullUrl = baseUrl.value + row.endpointPath
+        const response = await axios.post('/api/rest-http-datasource-config/test-connection', {
+          endpointPath: fullUrl,
+          method: row.method || 'POST',
+          authType: row.authType || 'none'
+        })
+
+        if (response.data.success) {
           ElMessage.success(`HTTP接口 "${row.configName}" 测试成功`)
           row.connectionStatus = 'connected'
         } else {
-          ElMessage.error(`HTTP接口 "${row.configName}" 测试失败`)
+          ElMessage.error(`HTTP接口 "${row.configName}" 测试失败: ${response.data.message}`)
           row.connectionStatus = 'disconnected'
         }
-      }, 2000)
+      } catch (error) {
+        ElMessage.error(`HTTP接口 "${row.configName}" 测试失败: ${error.response?.data?.message || error.message}`)
+        row.connectionStatus = 'disconnected'
+      }
     }
 
-    const handleTestConnection = () => {
-      ElMessage.info('正在测试连接...')
-      setTimeout(() => {
-        if (Math.random() > 0.3) {
+    const handleTestConnection = async () => {
+      if (!formRef.value) return
+
+      try {
+        await formRef.value.validate()
+
+        ElMessage.info('正在测试连接...')
+        const fullUrl = baseUrl + form.endpointPath
+        const response = await axios.post('/api/rest-http-datasource-config/test-connection', {
+          endpointPath: fullUrl,
+          method: form.method,
+          authType: 'none'
+        })
+
+        if (response.data.success) {
           ElMessage.success('HTTP接口连接测试成功')
+        } else {
+          ElMessage.error(response.data.message || '连接测试失败，请检查配置')
+        }
+      } catch (error) {
+        if (error.response) {
+          ElMessage.error(error.response.data?.message || '连接测试失败')
+        } else if (error instanceof Error) {
+          console.error('Validation error:', error)
         } else {
           ElMessage.error('连接测试失败，请检查配置')
         }
-      }, 2000)
+      }
     }
 
-    const testAllConnections = () => {
-      ElMessage.info('正在测试所有HTTP接口...')
-      setTimeout(() => {
-        ElMessage.success('连接测试完成，1个成功，1个失败')
-      }, 3000)
-    }
 
     const handleDelete = async (row) => {
       try {
@@ -620,6 +452,8 @@ export default {
     }
 
     const handleSubmit = async () => {
+      if (!formRef.value) return
+
       try {
         await formRef.value.validate()
 
@@ -637,7 +471,13 @@ export default {
           ElMessage.error(response.data.message || '保存失败')
         }
       } catch (error) {
-        ElMessage.error('请填写必填项')
+        if (error.response) {
+          ElMessage.error(error.response.data?.message || '保存失败')
+        } else if (error instanceof Error) {
+          console.error('Validation error:', error)
+        } else {
+          ElMessage.error('保存失败，请检查网络连接')
+        }
       }
     }
 
@@ -647,18 +487,6 @@ export default {
       form.alertTypeId = null
       form.endpointPath = ''
       form.method = 'POST'
-      form.authType = 'none'
-      form.apiKeyName = ''
-      form.apiKeyValue = ''
-      form.bearerToken = ''
-      form.basicUsername = ''
-      form.basicPassword = ''
-      form.customHeaders = [{ key: '', value: '' }]
-      form.contentType = 'application/json'
-      form.dataValidation = ''
-      form.rateLimitEnabled = false
-      form.rateLimitRequests = 100
-      form.rateLimitWindow = 60
       form.fieldMapping = [{ sourceField: '', targetField: '' }]
       form.description = ''
       form.isEnabled = true
@@ -689,8 +517,6 @@ export default {
       getAlertTypeTagType,
       getMethodTagType,
       isMapped,
-      addHeader,
-      removeHeader,
       addMapping,
       removeMapping,
       loadConfigs,
@@ -701,7 +527,6 @@ export default {
       handleEditFromDetail,
       handleTest,
       handleTestConnection,
-      testAllConnections,
       handleDelete,
       toggleConfig,
       handleSubmit,

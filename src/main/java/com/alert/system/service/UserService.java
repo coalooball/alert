@@ -33,9 +33,6 @@ public class UserService {
     @Autowired
     private JwtUtils jwtUtils;
 
-    @Value("${app.init-db:false}")
-    private boolean initDb;
-
     @PostConstruct
     public void init() {
         // Create default admin user if not exists

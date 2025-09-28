@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  cassandra:
+    image: cassandra:4.1
+    container_name: thehive-cassandra
+    hostname: cassandra
+    environment:
+      - CASSANDRA_CLUSTER_NAME=thehive
+      - MAX_HEAP_SIZE=1G
+      - HEAP_NEWSIZE=200M
+    volumes:
+      - cassandra-data:/var/lib/cassandra
+    networks:
+      - thehive-net
+    restart: unless-stopped
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.10
+    container_name: thehive-elasticsearch
+    hostname: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - cluster.name=thehive
+      - xpack.security.enabled=false
+      - thread_pool.search.queue_size=100000
+      - thread_pool.write.queue_size=10000
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      - thehive-net
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    container_name: thehive-minio
+    hostname: minio
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin123
+    volumes:
+      - minio-data:/data
+    ports:
+      - "9002:9000"
+      - "9003:9001"
+    networks:
+      - thehive-net
+    restart: unless-stopped
+
+  thehive:
+    image: strangebee/thehive:5.2
+    container_name: thehive
+    hostname: thehive
+    depends_on:
+      - cassandra
+      - elasticsearch
+      - minio
+    ports:
+      - "9090:9000"
+    environment:
+      - JVM_OPTS=-Xms1G -Xmx1G
+      - TH_NO_CONFIG_SECRET=1
+    volumes:
+      - thehive-data:/opt/thp/thehive/data
+      - thehive-index:/opt/thp/thehive/index
+      - ./thehive-config/application.conf:/etc/thehive/application.conf
+    networks:
+      - thehive-net
+    restart: unless-stopped
+
+  cortex:
+    image: thehiveproject/cortex:3.1.7
+    container_name: thehive-cortex
+    hostname: cortex
+    depends_on:
+      - elasticsearch
+    ports:
+      - "9001:9001"
+    environment:
+      - job_directory=/tmp/cortex-jobs
+    volumes:
+      - cortex-data:/tmp/cortex-jobs
+    networks:
+      - thehive-net
+    restart: unless-stopped
+
+networks:
+  thehive-net:
+    driver: bridge
+
+volumes:
+  cassandra-data:
+  elasticsearch-data:
+  minio-data:
+  thehive-data:
+  thehive-index:
+  cortex-data:

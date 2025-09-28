@@ -88,9 +88,6 @@ java -jar target/alert-system-0.1.0.jar --port=8080
 # Custom host and port
 java -jar target/alert-system-0.1.0.jar --host=0.0.0.0 --port=8080
 
-# Initialize database (drop and recreate)
-java -jar target/alert-system-0.1.0.jar --init-db
-
 # Help information
 java -jar target/alert-system-0.1.0.jar --help
 ```
@@ -98,31 +95,31 @@ java -jar target/alert-system-0.1.0.jar --help
 ### Available Command Line Options
 - `--port=<PORT>`: Port to bind the server to (default: 3000)
 - `--host=<HOST>`: Host address to bind the server to (default: 127.0.0.1)
-- `--init-db`: Initialize database (drop and recreate)
 - `-h, --help`: Show help information
 - `-V, --version`: Show version information
 
 ## Database Management
 
-### Initialize Database
-```bash
-# Drop and recreate the entire database with default admin user
-java -jar target/alert-system-0.1.0.jar --init-db
-```
+### Automatic Database Initialization
+The application automatically checks if the `alert_system` database exists on startup. If not, it will:
 
-This command will:
-1. 🗑️ Drop the 'alert_system' database (if exists)
-2. 🔨 Create a new 'alert_system' database
-3. 📄 Execute all SQL files in order
+1. 🔨 Create the `alert_system` database
+2. 📊 Generate all tables using JPA (Hibernate with `ddl-auto=update`)
+3. 📝 Insert default data from SQL files in `/sql/` directory
 4. ✅ Create default admin user (admin/admin123)
-5. 🎉 Complete initialization and exit
+
+**No manual initialization is required!** Just start the application and it will handle everything automatically.
 
 ### Database Structure
-- SQL files located in `/sql/` directory
-- Executed in numerical order: `001_*.sql`, `002_*.sql`, etc.
-- Current files:
-  - `001_create_users_table.sql` - User table structure
-  - `002_create_users_indexes.sql` - Database indexes
+- Tables are managed by JPA entities with `ddl-auto=update`
+- Default data is inserted from SQL files in `/sql/` directory
+- SQL files are executed in numerical order: `001_*.sql`, `002_*.sql`, etc.
+- Current SQL files:
+  - `001_insert_default_clickhouse_config.sql` - Default ClickHouse configuration
+  - `002_insert_alert_metadata.sql` - Alert types, subtypes, and fields
+  - `003_insert_alert_storage_mapping.sql` - Storage mapping configuration
+  - `004_insert_default_tags.sql` - Default tags
+  - `005_insert_default_datasource_config.sql` - Kafka and REST data source configurations
 
 ## API Endpoints
 

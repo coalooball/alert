@@ -1,47 +1,7 @@
 -- =====================================================
--- 告警元数据管理表
+-- 告警元数据默认数据
+-- Tables are managed by JPA Entities
 -- =====================================================
-
--- 1. 告警类型表
-CREATE TABLE IF NOT EXISTS alert_types (
-    id INTEGER PRIMARY KEY,
-    type_name VARCHAR(50) NOT NULL,
-    type_label VARCHAR(100) NOT NULL,
-    description TEXT,
-    is_active BOOLEAN DEFAULT true,
-    display_order INTEGER DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 2. 告警子类型表
-CREATE TABLE IF NOT EXISTS alert_subtypes (
-    id SERIAL PRIMARY KEY,
-    alert_type_id INTEGER NOT NULL REFERENCES alert_types(id) ON DELETE CASCADE,
-    subtype_code VARCHAR(20) NOT NULL,
-    subtype_label VARCHAR(100) NOT NULL,
-    description TEXT,
-    is_active BOOLEAN DEFAULT true,
-    display_order INTEGER DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(alert_type_id, subtype_code)
-);
-
--- 3. 告警字段表
-CREATE TABLE IF NOT EXISTS alert_fields (
-    id SERIAL PRIMARY KEY,
-    alert_type_id INTEGER NOT NULL REFERENCES alert_types(id) ON DELETE CASCADE,
-    field_name VARCHAR(100) NOT NULL,
-    field_label VARCHAR(100) NOT NULL,
-    field_type VARCHAR(50) DEFAULT 'string', -- string, number, string[], number[]
-    description TEXT,
-    is_active BOOLEAN DEFAULT true,
-    display_order INTEGER DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(alert_type_id, field_name)
-);
 
 -- 插入告警类型数据
 INSERT INTO alert_types (id, type_name, type_label, description, display_order) VALUES
@@ -227,9 +187,3 @@ ON CONFLICT (alert_type_id, field_name) DO UPDATE SET
     field_type = EXCLUDED.field_type,
     display_order = EXCLUDED.display_order,
     updated_at = CURRENT_TIMESTAMP;
-
--- 创建索引
-CREATE INDEX idx_alert_subtypes_type ON alert_subtypes(alert_type_id);
-CREATE INDEX idx_alert_fields_type ON alert_fields(alert_type_id);
-CREATE INDEX idx_alert_subtypes_active ON alert_subtypes(is_active);
-CREATE INDEX idx_alert_fields_active ON alert_fields(is_active);

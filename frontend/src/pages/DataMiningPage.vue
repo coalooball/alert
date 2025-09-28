@@ -7,8 +7,19 @@
           <span>告警数据挖掘</span>
         </div>
       </template>
-      <div class="empty-content">
-        <el-empty description="此页面正在开发中..." />
+      <div class="content">
+        <el-menu
+          :default-active="activeSubPage"
+          mode="horizontal"
+          @select="handleSubPageSelect"
+          class="sub-page-menu"
+        >
+          <el-menu-item index="alertdata">告警数据</el-menu-item>
+          <el-menu-item index="threatevent">威胁事件</el-menu-item>
+        </el-menu>
+        <div class="sub-page-content">
+          <component :is="currentSubComponent" />
+        </div>
       </div>
     </el-card>
   </div>
@@ -16,11 +27,34 @@
 
 <script>
 import { DataAnalysis } from '@element-plus/icons-vue'
+import AlertDataPage from './AlertDataPage.vue'
+import ThreatEventPage from './ThreatEventPage.vue'
 
 export default {
   name: 'DataMiningPage',
   components: {
-    DataAnalysis
+    DataAnalysis,
+    AlertDataPage,
+    ThreatEventPage
+  },
+  data() {
+    return {
+      activeSubPage: 'alertdata'
+    }
+  },
+  computed: {
+    currentSubComponent() {
+      const componentMap = {
+        'alertdata': 'AlertDataPage',
+        'threatevent': 'ThreatEventPage'
+      }
+      return componentMap[this.activeSubPage] || 'AlertDataPage'
+    }
+  },
+  methods: {
+    handleSubPageSelect(index) {
+      this.activeSubPage = index
+    }
   }
 }
 </script>
@@ -46,10 +80,19 @@ export default {
   color: #409eff;
 }
 
-.empty-content {
+.content {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 400px;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sub-page-menu {
+  border-bottom: 1px solid #e4e7ed;
+  margin-bottom: 20px;
+}
+
+.sub-page-content {
+  flex: 1;
+  overflow: auto;
 }
 </style>

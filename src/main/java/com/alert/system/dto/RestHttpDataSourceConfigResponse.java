@@ -1,100 +1,64 @@
-package com.alert.system.entity;
+package com.alert.system.dto;
 
-import jakarta.persistence.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import com.alert.system.entity.RestHttpDataSourceConfig;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "rest_http_datasource_config")
-public class RestHttpDataSourceConfig {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class RestHttpDataSourceConfigResponse {
     private Long id;
-
-    @Column(name = "config_name", nullable = false, length = 200)
     private String configName;
-
-    @Column(name = "alert_type_id", nullable = false)
     private Long alertTypeId;
-
-    @Column(name = "endpoint_path", nullable = false, length = 500)
+    private String alertTypeName;
+    private String alertTypeLabel;
     private String endpointPath;
-
-    @Column(name = "method", nullable = false, length = 10)
-    private String method = "POST";
-
-    @Column(name = "auth_type", length = 50)
-    private String authType = "none";
-
-    @Column(name = "api_key_name", length = 100)
+    private String method;
+    private String authType;
     private String apiKeyName;
-
-    @Column(name = "api_key_value", length = 500)
-    private String apiKeyValue;
-
-    @Column(name = "bearer_token", length = 1000)
     private String bearerToken;
-
-    @Column(name = "basic_username", length = 200)
     private String basicUsername;
-
-    @Column(name = "basic_password", length = 500)
-    private String basicPassword;
-
-    @Column(name = "custom_headers", columnDefinition = "JSON")
-    @JdbcTypeCode(SqlTypes.JSON)
     private String customHeaders;
-
-    @Column(name = "content_type", length = 100)
-    private String contentType = "application/json";
-
-    @Column(name = "data_validation", columnDefinition = "TEXT")
+    private String contentType;
     private String dataValidation;
-
-    @Column(name = "field_mapping", columnDefinition = "JSON")
-    @JdbcTypeCode(SqlTypes.JSON)
     private String fieldMapping;
-
-    @Column(name = "rate_limit_enabled", nullable = false)
-    private Boolean rateLimitEnabled = false;
-
-    @Column(name = "rate_limit_requests")
+    private Boolean rateLimitEnabled;
     private Integer rateLimitRequests;
-
-    @Column(name = "rate_limit_window")
     private Integer rateLimitWindow;
-
-    @Column(name = "description", length = 1000)
     private String description;
-
-    @Column(name = "is_enabled", nullable = false)
-    private Boolean isEnabled = true;
-
-    @Column(name = "created_by", length = 100)
+    private Boolean isEnabled;
     private String createdBy;
-
-    @Column(name = "create_time", nullable = false)
     private LocalDateTime createTime;
-
-    @Column(name = "update_time", nullable = false)
     private LocalDateTime updateTime;
 
-    // 关联alert_types表
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "alert_type_id", insertable = false, updatable = false)
-    private AlertType alertType;
+    public static RestHttpDataSourceConfigResponse fromEntity(RestHttpDataSourceConfig config) {
+        RestHttpDataSourceConfigResponse response = new RestHttpDataSourceConfigResponse();
+        response.setId(config.getId());
+        response.setConfigName(config.getConfigName());
+        response.setAlertTypeId(config.getAlertTypeId());
 
-    @PrePersist
-    protected void onCreate() {
-        LocalDateTime now = LocalDateTime.now();
-        createTime = now;
-        updateTime = now;
-    }
+        if (config.getAlertType() != null) {
+            response.setAlertTypeName(config.getAlertType().getTypeName());
+            response.setAlertTypeLabel(config.getAlertType().getTypeLabel());
+        }
 
-    @PreUpdate
-    protected void onUpdate() {
-        updateTime = LocalDateTime.now();
+        response.setEndpointPath(config.getEndpointPath());
+        response.setMethod(config.getMethod());
+        response.setAuthType(config.getAuthType());
+        response.setApiKeyName(config.getApiKeyName());
+        response.setBearerToken(config.getBearerToken());
+        response.setBasicUsername(config.getBasicUsername());
+        response.setCustomHeaders(config.getCustomHeaders());
+        response.setContentType(config.getContentType());
+        response.setDataValidation(config.getDataValidation());
+        response.setFieldMapping(config.getFieldMapping());
+        response.setRateLimitEnabled(config.getRateLimitEnabled());
+        response.setRateLimitRequests(config.getRateLimitRequests());
+        response.setRateLimitWindow(config.getRateLimitWindow());
+        response.setDescription(config.getDescription());
+        response.setIsEnabled(config.getIsEnabled());
+        response.setCreatedBy(config.getCreatedBy());
+        response.setCreateTime(config.getCreateTime());
+        response.setUpdateTime(config.getUpdateTime());
+
+        return response;
     }
 
     // Getters and Setters
@@ -120,6 +84,22 @@ public class RestHttpDataSourceConfig {
 
     public void setAlertTypeId(Long alertTypeId) {
         this.alertTypeId = alertTypeId;
+    }
+
+    public String getAlertTypeName() {
+        return alertTypeName;
+    }
+
+    public void setAlertTypeName(String alertTypeName) {
+        this.alertTypeName = alertTypeName;
+    }
+
+    public String getAlertTypeLabel() {
+        return alertTypeLabel;
+    }
+
+    public void setAlertTypeLabel(String alertTypeLabel) {
+        this.alertTypeLabel = alertTypeLabel;
     }
 
     public String getEndpointPath() {
@@ -154,14 +134,6 @@ public class RestHttpDataSourceConfig {
         this.apiKeyName = apiKeyName;
     }
 
-    public String getApiKeyValue() {
-        return apiKeyValue;
-    }
-
-    public void setApiKeyValue(String apiKeyValue) {
-        this.apiKeyValue = apiKeyValue;
-    }
-
     public String getBearerToken() {
         return bearerToken;
     }
@@ -176,14 +148,6 @@ public class RestHttpDataSourceConfig {
 
     public void setBasicUsername(String basicUsername) {
         this.basicUsername = basicUsername;
-    }
-
-    public String getBasicPassword() {
-        return basicPassword;
-    }
-
-    public void setBasicPassword(String basicPassword) {
-        this.basicPassword = basicPassword;
     }
 
     public String getCustomHeaders() {
@@ -280,13 +244,5 @@ public class RestHttpDataSourceConfig {
 
     public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
-    }
-
-    public AlertType getAlertType() {
-        return alertType;
-    }
-
-    public void setAlertType(AlertType alertType) {
-        this.alertType = alertType;
     }
 }

@@ -21,9 +21,6 @@ public class AlertSystemApplication {
                 printVersion();
                 System.exit(0);
             }
-            if ("--init-db".equals(arg)) {
-                System.setProperty("app.init-db", "true");
-            }
             if (arg.startsWith("--port=") || arg.startsWith("-P=")) {
                 String port = arg.substring(arg.indexOf('=') + 1);
                 System.setProperty("SERVER_PORT", port);
@@ -34,13 +31,7 @@ public class AlertSystemApplication {
             }
         }
 
-        ApplicationContext context = app.run(args);
-
-        if (System.getProperty("app.init-db") != null) {
-            System.out.println("🎉 Database initialization completed successfully!");
-            System.out.println("💡 You can now run 'java -jar target/alert-system-0.1.0.jar' to start the server");
-            System.exit(0);
-        }
+        app.run(args);
     }
 
     @Bean
@@ -63,7 +54,6 @@ public class AlertSystemApplication {
         System.out.println("\nOptions:");
         System.out.println("  -P, --port <PORT>    Port to bind the server to (default: 3000)");
         System.out.println("  -H, --host <HOST>    Host address to bind the server to (default: 127.0.0.1)");
-        System.out.println("  --init-db            Initialize database (drop and recreate)");
         System.out.println("  -h, --help           Show this help message");
         System.out.println("  -V, --version        Show version information");
     }
