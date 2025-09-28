@@ -140,104 +140,17 @@
             <div class="content-panel">
               <h3>告警数据智能处理</h3>
               <div class="section-content">
-                <!-- 收敛规则 -->
-                <div class="rule-section">
-                  <div class="rule-header">
-                    <h4>收敛规则管理</h4>
-                    <el-button type="primary" @click="handleAddConvergenceRule">
-                      <el-icon><Plus /></el-icon>
-                      新增收敛规则
-                    </el-button>
-                  </div>
+                <el-tabs type="border-card" v-model="processingActiveTab">
+                  <!-- 收敛规则 -->
+                  <el-tab-pane label="收敛规则" name="convergence-rules">
+                    <AlertConvergenceRules />
+                  </el-tab-pane>
 
-                  <!-- 搜索过滤 -->
-                  <div class="filter-bar">
-                    <el-form :inline="true">
-                      <el-form-item label="规则名称">
-                        <el-input v-model="convergenceSearch.ruleName" placeholder="搜索规则名称" clearable />
-                      </el-form-item>
-                      <el-form-item label="告警类型">
-                        <el-select v-model="convergenceSearch.alertType" placeholder="选择告警类型" clearable>
-                          <el-option label="网络攻击" :value="1" />
-                          <el-option label="恶意样本" :value="2" />
-                          <el-option label="主机行为" :value="3" />
-                        </el-select>
-                      </el-form-item>
-                      <el-form-item label="状态">
-                        <el-select v-model="convergenceSearch.enabled" placeholder="选择状态" clearable>
-                          <el-option label="启用" :value="true" />
-                          <el-option label="禁用" :value="false" />
-                        </el-select>
-                      </el-form-item>
-                      <el-form-item>
-                        <el-button type="primary" @click="searchConvergenceRules">搜索</el-button>
-                        <el-button @click="resetConvergenceSearch">重置</el-button>
-                      </el-form-item>
-                    </el-form>
-                  </div>
-
-                  <!-- 收敛规则表格 -->
-                  <el-table :data="convergenceRules" stripe v-loading="convergenceLoading">
-                    <el-table-column prop="ruleName" label="规则名称" />
-                    <el-table-column prop="ruleDescription" label="规则描述" show-overflow-tooltip />
-                    <el-table-column prop="alertType" label="告警类型" width="120">
-                      <template #default="scope">
-                        {{ getAlertTypeName(scope.row.alertType) }}
-                      </template>
-                    </el-table-column>
-                    <el-table-column prop="alertSubtype" label="告警子类" width="120" />
-                    <el-table-column prop="convergenceType" label="收敛类型" width="140">
-                      <template #default="scope">
-                        <el-tag :type="scope.row.convergenceType === 'field_match' ? 'primary' : 'success'">
-                          {{ scope.row.convergenceType === 'field_match' ? '字段匹配' : '机器学习' }}
-                        </el-tag>
-                      </template>
-                    </el-table-column>
-                    <el-table-column prop="timeWindow" label="时间窗口" width="120">
-                      <template #default="scope">
-                        {{ scope.row.timeWindow }}秒
-                      </template>
-                    </el-table-column>
-                    <el-table-column prop="minCount" label="最小数量" width="100" />
-                    <el-table-column prop="priority" label="优先级" width="100">
-                      <template #default="scope">
-                        <el-tag :type="getPriorityType(scope.row.priority)">
-                          {{ scope.row.priority }}
-                        </el-tag>
-                      </template>
-                    </el-table-column>
-                    <el-table-column prop="isEnabled" label="状态" width="80">
-                      <template #default="scope">
-                        <el-switch
-                          v-model="scope.row.isEnabled"
-                          @change="toggleConvergenceRule(scope.row)"
-                        />
-                      </template>
-                    </el-table-column>
-                    <el-table-column label="操作" width="200" fixed="right">
-                      <template #default="scope">
-                        <el-button size="small" type="primary" @click="handleEditConvergenceRule(scope.row)">
-                          编辑
-                        </el-button>
-                        <el-button size="small" type="danger" @click="handleDeleteConvergenceRule(scope.row)">
-                          删除
-                        </el-button>
-                      </template>
-                    </el-table-column>
-                  </el-table>
-
-                  <!-- 分页 -->
-                  <el-pagination
-                    v-model:current-page="convergencePagination.currentPage"
-                    v-model:page-size="convergencePagination.pageSize"
-                    :page-sizes="[10, 20, 50, 100]"
-                    :total="convergencePagination.total"
-                    layout="total, sizes, prev, pager, next, jumper"
-                    @size-change="handleConvergencePageSizeChange"
-                    @current-change="handleConvergencePageChange"
-                    style="margin-top: 20px; justify-content: center"
-                  />
-                </div>
+                  <!-- 智能模型管理 -->
+                  <el-tab-pane label="智能模型管理" name="model-management">
+                    <IntelligentModelManagement />
+                  </el-tab-pane>
+                </el-tabs>
               </div>
             </div>
           </el-tab-pane>
@@ -246,7 +159,27 @@
             <div class="content-panel">
               <h3>告警数据智能分析</h3>
               <div class="section-content">
-                <el-empty description="功能开发中，敬请期待" />
+                <el-tabs type="border-card" v-model="analysisActiveTab">
+                  <!-- 关联剧本 -->
+                  <el-tab-pane label="关联剧本" name="playbooks">
+                    <AssociatedPlaybooks />
+                  </el-tab-pane>
+
+                  <!-- 关联规则 -->
+                  <el-tab-pane label="关联规则" name="rules">
+                    <AssociatedRules />
+                  </el-tab-pane>
+
+                  <!-- 威胁情报配置 -->
+                  <el-tab-pane label="威胁情报配置" name="threat-intelligence">
+                    <ThreatIntelligenceConfig />
+                  </el-tab-pane>
+
+                  <!-- 智能模型配置 -->
+                  <el-tab-pane label="智能模型配置" name="ai-models">
+                    <AIModelConfig />
+                  </el-tab-pane>
+                </el-tabs>
               </div>
             </div>
           </el-tab-pane>
@@ -655,6 +588,12 @@
 <script>
 import { Setting, Document, Operation, List, Plus, Delete } from '@element-plus/icons-vue'
 import AlertFilterRules from '../components/AlertFilterRules.vue'
+import AlertConvergenceRules from '../components/AlertConvergenceRules.vue'
+import IntelligentModelManagement from '../components/IntelligentModelManagement.vue'
+import AssociatedPlaybooks from '../components/AssociatedPlaybooks.vue'
+import AssociatedRules from '../components/AssociatedRules.vue'
+import ThreatIntelligenceConfig from '../components/ThreatIntelligenceConfig.vue'
+import AIModelConfig from '../components/AIModelConfig.vue'
 
 export default {
   name: 'AutomationPage',
@@ -665,7 +604,13 @@ export default {
     List,
     Plus,
     Delete,
-    AlertFilterRules
+    AlertFilterRules,
+    AlertConvergenceRules,
+    IntelligentModelManagement,
+    AssociatedPlaybooks,
+    AssociatedRules,
+    ThreatIntelligenceConfig,
+    AIModelConfig
   },
   data() {
     return {
@@ -684,19 +629,9 @@ export default {
       // 告警数据智能处理
       processingActiveTab: 'convergence-rules',
 
-      // 收敛规则相关
-      convergenceRules: [],
-      convergenceLoading: false,
-      convergenceSearch: {
-        ruleName: '',
-        alertType: null,
-        enabled: null
-      },
-      convergencePagination: {
-        currentPage: 1,
-        pageSize: 10,
-        total: 0
-      },
+      // 告警数据智能分析
+      analysisActiveTab: 'playbooks',
+
 
       // 标签规则相关
       taggingRules: [],
@@ -1004,161 +939,6 @@ export default {
       return typeMap[type] || '未知类型'
     },
 
-    // 收敛规则相关方法
-    async loadConvergenceRules() {
-      this.convergenceLoading = true
-      try {
-        const params = new URLSearchParams({
-          page: this.convergencePagination.currentPage - 1,
-          size: this.convergencePagination.pageSize
-        })
-
-        if (this.convergenceSearch.ruleName) {
-          params.append('ruleName', this.convergenceSearch.ruleName)
-        }
-        if (this.convergenceSearch.alertType !== null) {
-          params.append('alertType', this.convergenceSearch.alertType)
-        }
-        if (this.convergenceSearch.enabled !== null) {
-          params.append('isEnabled', this.convergenceSearch.enabled)
-        }
-
-        const response = await fetch(`/api/alert/convergence-rules?${params.toString()}`, {
-          credentials: 'include'
-        })
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-
-        const data = await response.json()
-        this.convergenceRules = data.records || []
-        this.convergencePagination.total = data.total || 0
-      } catch (error) {
-        console.error('Failed to load convergence rules:', error)
-        this.$message.error('加载收敛规则失败: ' + error.message)
-        // 使用模拟数据作为fallback
-        this.convergenceRules = [
-          {
-            id: '1',
-            ruleName: '相同IP攻击收敛',
-            ruleDescription: '将来自相同源IP的攻击告警进行收敛',
-            alertType: 1,
-            alertSubtype: 'web_attack',
-            convergenceType: 'field_match',
-            convergenceFields: ['src_ip'],
-            timeWindow: 3600,
-            minCount: 3,
-            priority: 5,
-            isEnabled: true
-          },
-          {
-            id: '2',
-            ruleName: '恶意文件收敛',
-            ruleDescription: '基于文件hash进行恶意文件告警收敛',
-            alertType: 2,
-            alertSubtype: 'malware',
-            convergenceType: 'field_match',
-            convergenceFields: ['file_hash'],
-            timeWindow: 1800,
-            minCount: 2,
-            priority: 3,
-            isEnabled: true
-          }
-        ]
-        this.convergencePagination.total = this.convergenceRules.length
-      } finally {
-        this.convergenceLoading = false
-      }
-    },
-
-    searchConvergenceRules() {
-      this.convergencePagination.currentPage = 1
-      this.loadConvergenceRules()
-    },
-
-    resetConvergenceSearch() {
-      this.convergenceSearch = {
-        ruleName: '',
-        alertType: null,
-        enabled: null
-      }
-      this.searchConvergenceRules()
-    },
-
-    handleConvergencePageChange(page) {
-      this.convergencePagination.currentPage = page
-      this.loadConvergenceRules()
-    },
-
-    handleConvergencePageSizeChange(size) {
-      this.convergencePagination.pageSize = size
-      this.convergencePagination.currentPage = 1
-      this.loadConvergenceRules()
-    },
-
-    handleAddConvergenceRule() {
-      // TODO: 打开新增收敛规则对话框
-      this.$message.info('新增收敛规则功能开发中...')
-    },
-
-    handleEditConvergenceRule(rule) {
-      // TODO: 打开编辑收敛规则对话框
-      this.$message.info(`编辑收敛规则: ${rule.ruleName}`)
-    },
-
-    handleDeleteConvergenceRule(rule) {
-      this.$confirm(`确定要删除收敛规则 "${rule.ruleName}" 吗？`, '确认删除', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(async () => {
-        try {
-          const response = await fetch(`/api/alert/convergence-rules/${rule.id}`, {
-            method: 'DELETE',
-            credentials: 'include'
-          })
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`)
-          }
-
-          this.$message.success('删除成功')
-          this.loadConvergenceRules()
-        } catch (error) {
-          console.error('Failed to delete convergence rule:', error)
-          this.$message.error('删除失败: ' + error.message)
-        }
-      }).catch(() => {
-        this.$message.info('已取消删除')
-      })
-    },
-
-    async toggleConvergenceRule(rule) {
-      const originalState = rule.isEnabled
-      try {
-        const response = await fetch(`/api/alert/convergence-rules/${rule.id}/toggle`, {
-          method: 'PATCH',
-          credentials: 'include'
-        })
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-
-        const result = await response.json()
-        if (result.success) {
-          this.$message.success(`已${rule.isEnabled ? '启用' : '禁用'}规则`)
-        } else {
-          throw new Error(result.message || 'Toggle failed')
-        }
-      } catch (error) {
-        console.error('Failed to toggle convergence rule:', error)
-        this.$message.error('更新状态失败: ' + error.message)
-        // 回退状态
-        rule.isEnabled = originalState
-      }
-    },
 
     // 标签规则相关方法
     async loadTaggingRules() {
@@ -1736,7 +1516,6 @@ export default {
 
   mounted() {
     // 初始化时加载数据
-    this.loadConvergenceRules()
     this.loadTaggingRules()
     this.loadTags()
   }

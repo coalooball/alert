@@ -11,5 +11,7 @@ public interface AlertFieldRepository extends JpaRepository<AlertField, Integer>
 
     List<AlertField> findByAlertTypeIdAndIsActiveTrueOrderByDisplayOrderAsc(Integer alertTypeId);
 
+    List<AlertField> findByAlertTypeIdAndIsActiveTrue(Integer alertTypeId);
+
     AlertField findByAlertTypeIdAndFieldName(Integer alertTypeId, String fieldName);
 }

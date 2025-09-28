@@ -22,6 +22,12 @@
           <el-tab-pane label="告警数据类型配置" name="alertDataType">
             <AlertDataTypeConfig />
           </el-tab-pane>
+          <el-tab-pane label="告警数据存储配置" name="dataStorage">
+            <DataStorageConfigTabs />
+          </el-tab-pane>
+          <el-tab-pane label="告警数据来源配置" name="dataSource">
+            <AlertDataSourceConfig />
+          </el-tab-pane>
         </el-tabs>
       </div>
     </el-card>
@@ -34,6 +40,8 @@ import UserManagement from '../components/UserManagement.vue'
 import SystemInfo from '../components/SystemInfo.vue'
 import ComputeEngine from '../views/ComputeEngine.vue'
 import AlertDataTypeConfig from '../components/AlertDataTypeConfig.vue'
+import DataStorageConfigTabs from '../components/DataStorageConfigTabs.vue'
+import AlertDataSourceConfig from '../components/AlertDataSourceConfig.vue'
 
 export default {
   name: 'SettingsPage',
@@ -42,7 +50,9 @@ export default {
     UserManagement,
     SystemInfo,
     ComputeEngine,
-    AlertDataTypeConfig
+    AlertDataTypeConfig,
+    DataStorageConfigTabs,
+    AlertDataSourceConfig
   },
   data() {
     return {

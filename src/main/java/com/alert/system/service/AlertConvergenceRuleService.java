@@ -133,7 +133,11 @@ public class AlertConvergenceRuleService {
         entity.setAlertType(request.getAlertType());
         entity.setAlertSubtype(request.getAlertSubtype());
         entity.setConvergenceType(request.getConvergenceType());
-        entity.setConvergenceFields(request.getConvergenceFields());
+        entity.setEngineFields(request.getEngineFields());
+        entity.setMlFields(request.getMlFields());
+        entity.setUseMlModel(request.getUseMlModel());
+        entity.setMlModelName(request.getMlModelName());
+        entity.setMlModelConfig(request.getMlModelConfig());
         entity.setConvergenceConfig(request.getConvergenceConfig());
         entity.setTimeWindow(request.getTimeWindow());
         entity.setMinCount(request.getMinCount());
