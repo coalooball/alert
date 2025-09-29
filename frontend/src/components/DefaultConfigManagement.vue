@@ -48,7 +48,7 @@
 <script>
 import { Setting, RefreshRight } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import axios from 'axios'
+import axios from '../utils/axios'
 
 export default {
   name: 'DefaultConfigManagement',

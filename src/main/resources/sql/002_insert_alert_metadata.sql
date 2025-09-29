@@ -4,63 +4,67 @@
 -- =====================================================
 
 -- 插入告警类型数据
-INSERT INTO alert_types (id, type_name, type_label, description, display_order) VALUES
-(1, 'network_attack', '网络攻击', '网络攻击类告警', 1),
-(2, 'malicious_sample', '恶意样本', '恶意样本类告警', 2),
-(3, 'host_behavior', '主机行为', '主机行为类告警', 3)
+INSERT INTO alert_types (id, type_name, type_label, description, display_order, is_active) VALUES
+(1, 'network_attack', '网络攻击', '网络攻击类告警', 1, true),
+(2, 'malicious_sample', '恶意样本', '恶意样本类告警', 2, true),
+(3, 'host_behavior', '主机行为', '主机行为类告警', 3, true)
 ON CONFLICT (id) DO UPDATE SET
     type_label = EXCLUDED.type_label,
+    is_active = EXCLUDED.is_active,
     updated_at = CURRENT_TIMESTAMP;
 
 -- 插入网络攻击子类型
-INSERT INTO alert_subtypes (alert_type_id, subtype_code, subtype_label, display_order) VALUES
-(1, '01001', '网络扫描探测', 1),
-(1, '01002', '网络钓鱼', 2),
-(1, '01003', '漏洞利用', 3),
-(1, '01004', '后门通信', 4),
-(1, '01005', '凭据攻击', 5),
-(1, '01006', '拒绝服务', 6),
-(1, '01007', '网页篡改', 7),
-(1, '01008', '失陷主机', 8),
-(1, '01009', 'APT攻击', 9),
-(1, '01010', '其他网络攻击', 10)
+INSERT INTO alert_subtypes (alert_type_id, subtype_code, subtype_label, display_order, is_active) VALUES
+(1, '01001', '网络扫描探测', 1, true),
+(1, '01002', '网络钓鱼', 2, true),
+(1, '01003', '漏洞利用', 3, true),
+(1, '01004', '后门通信', 4, true),
+(1, '01005', '凭据攻击', 5, true),
+(1, '01006', '拒绝服务', 6, true),
+(1, '01007', '网页篡改', 7, true),
+(1, '01008', '失陷主机', 8, true),
+(1, '01009', 'APT攻击', 9, true),
+(1, '01010', '其他网络攻击', 10, true)
 ON CONFLICT (alert_type_id, subtype_code) DO UPDATE SET
     subtype_label = EXCLUDED.subtype_label,
     display_order = EXCLUDED.display_order,
+    is_active = EXCLUDED.is_active,
     updated_at = CURRENT_TIMESTAMP;
 
 -- 插入恶意样本子类型
-INSERT INTO alert_subtypes (alert_type_id, subtype_code, subtype_label, display_order) VALUES
-(2, '02001', '计算机病毒', 1),
-(2, '02002', '网络蠕虫', 2),
-(2, '02003', '特洛伊木马', 3),
-(2, '02004', '僵尸网络', 4),
-(2, '02005', '勒索软件', 5),
-(2, '02006', '挖矿软件', 6),
-(2, '02007', '其他恶意样本', 7)
+INSERT INTO alert_subtypes (alert_type_id, subtype_code, subtype_label, display_order, is_active) VALUES
+(2, '02001', '计算机病毒', 1, true),
+(2, '02002', '网络蠕虫', 2, true),
+(2, '02003', '特洛伊木马', 3, true),
+(2, '02004', '僵尸网络', 4, true),
+(2, '02005', '勒索软件', 5, true),
+(2, '02006', '挖矿软件', 6, true),
+(2, '02007', '其他恶意样本', 7, true)
 ON CONFLICT (alert_type_id, subtype_code) DO UPDATE SET
     subtype_label = EXCLUDED.subtype_label,
     display_order = EXCLUDED.display_order,
+    is_active = EXCLUDED.is_active,
     updated_at = CURRENT_TIMESTAMP;
 
 -- 插入主机行为子类型
-INSERT INTO alert_subtypes (alert_type_id, subtype_code, subtype_label, display_order) VALUES
-(3, '03001', '挖矿攻击', 1),
-(3, '03002', '勒索攻击', 2),
-(3, '03003', '远控攻击', 3),
-(3, '03004', '爆破攻击', 4),
-(3, '03005', '后门攻击', 5),
-(3, '03006', '注入攻击', 6),
-(3, '03007', '横向移动攻击', 7),
-(3, '03008', '数据窃取攻击', 8),
-(3, '03009', '其它异常行为告警', 9)
+INSERT INTO alert_subtypes (alert_type_id, subtype_code, subtype_label, display_order, is_active) VALUES
+(3, '03001', '挖矿攻击', 1, true),
+(3, '03002', '勒索攻击', 2, true),
+(3, '03003', '远控攻击', 3, true),
+(3, '03004', '爆破攻击', 4, true),
+(3, '03005', '后门攻击', 5, true),
+(3, '03006', '注入攻击', 6, true),
+(3, '03007', '横向移动攻击', 7, true),
+(3, '03008', '数据窃取攻击', 8, true),
+(3, '03009', '其它异常行为告警', 9, true)
 ON CONFLICT (alert_type_id, subtype_code) DO UPDATE SET
     subtype_label = EXCLUDED.subtype_label,
     display_order = EXCLUDED.display_order,
+    is_active = EXCLUDED.is_active,
     updated_at = CURRENT_TIMESTAMP;
 
 -- 插入网络攻击字段（根据API文档完整字段）
-INSERT INTO alert_fields (alert_type_id, field_name, field_label, field_type, display_order) VALUES
+INSERT INTO alert_fields (alert_type_id, field_name, field_label, field_type, display_order, is_active) VALUES
 (1, 'alarm_id', '告警ID', 'string', 1),
 (1, 'alarm_date', '告警时间', 'number', 2),
 (1, 'alarm_severity', '告警等级', 'number', 3),
@@ -94,10 +98,11 @@ ON CONFLICT (alert_type_id, field_name) DO UPDATE SET
     field_label = EXCLUDED.field_label,
     field_type = EXCLUDED.field_type,
     display_order = EXCLUDED.display_order,
+    is_active = EXCLUDED.is_active,
     updated_at = CURRENT_TIMESTAMP;
 
 -- 插入恶意样本字段（根据API文档完整字段）
-INSERT INTO alert_fields (alert_type_id, field_name, field_label, field_type, display_order) VALUES
+INSERT INTO alert_fields (alert_type_id, field_name, field_label, field_type, display_order, is_active) VALUES
 (2, 'alarm_id', '告警ID', 'string', 1),
 (2, 'alarm_date', '告警时间', 'number', 2),
 (2, 'alarm_severity', '告警等级', 'number', 3),
@@ -142,10 +147,11 @@ ON CONFLICT (alert_type_id, field_name) DO UPDATE SET
     field_label = EXCLUDED.field_label,
     field_type = EXCLUDED.field_type,
     display_order = EXCLUDED.display_order,
+    is_active = EXCLUDED.is_active,
     updated_at = CURRENT_TIMESTAMP;
 
 -- 插入主机行为字段（根据API文档完整字段）
-INSERT INTO alert_fields (alert_type_id, field_name, field_label, field_type, display_order) VALUES
+INSERT INTO alert_fields (alert_type_id, field_name, field_label, field_type, display_order, is_active) VALUES
 (3, 'alarm_id', '告警ID', 'string', 1),
 (3, 'alarm_date', '告警时间', 'number', 2),
 (3, 'alarm_severity', '告警等级', 'number', 3),
@@ -186,4 +192,5 @@ ON CONFLICT (alert_type_id, field_name) DO UPDATE SET
     field_label = EXCLUDED.field_label,
     field_type = EXCLUDED.field_type,
     display_order = EXCLUDED.display_order,
+    is_active = EXCLUDED.is_active,
     updated_at = CURRENT_TIMESTAMP;

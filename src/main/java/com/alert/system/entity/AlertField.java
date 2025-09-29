@@ -9,7 +9,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "alert_fields")
+@Table(name = "alert_fields",
+       uniqueConstraints = @UniqueConstraint(columnNames = {"alert_type_id", "field_name"}))
 @Data
 @EqualsAndHashCode(exclude = {"alertType"})
 @ToString(exclude = {"alertType"})

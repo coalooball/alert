@@ -114,11 +114,26 @@ public class DatabaseInitializer implements BeanFactoryPostProcessor, Environmen
             try {
                 JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 
-                // Check if default data already exists
-                Long count = jdbcTemplate.queryForObject(
+                // Check if all default data already exists
+                Long alertTypesCount = jdbcTemplate.queryForObject(
                         "SELECT COUNT(*) FROM alert_types", Long.class);
+                Long alertSubtypesCount = jdbcTemplate.queryForObject(
+                        "SELECT COUNT(*) FROM alert_subtypes", Long.class);
+                Long alertFieldsCount = jdbcTemplate.queryForObject(
+                        "SELECT COUNT(*) FROM alert_fields", Long.class);
+                Long storageMappingCount = jdbcTemplate.queryForObject(
+                        "SELECT COUNT(*) FROM alert_storage_mapping", Long.class);
+                Long tagsCount = jdbcTemplate.queryForObject(
+                        "SELECT COUNT(*) FROM tags", Long.class);
+                Long flinkConfigCount = jdbcTemplate.queryForObject(
+                        "SELECT COUNT(*) FROM flink_configs", Long.class);
 
-                if (count != null && count > 0) {
+                if (alertTypesCount != null && alertTypesCount > 0
+                    && alertSubtypesCount != null && alertSubtypesCount > 0
+                    && alertFieldsCount != null && alertFieldsCount > 0
+                    && storageMappingCount != null && storageMappingCount > 0
+                    && tagsCount != null && tagsCount > 0
+                    && flinkConfigCount != null && flinkConfigCount > 0) {
                     log.info("✅ Default data already exists, skipping initialization");
                     return;
                 }
@@ -139,7 +154,8 @@ public class DatabaseInitializer implements BeanFactoryPostProcessor, Environmen
                 "sql/002_insert_alert_metadata.sql",
                 "sql/003_insert_alert_storage_mapping.sql",
                 "sql/004_insert_default_tags.sql",
-                "sql/005_insert_default_datasource_config.sql"
+                "sql/005_insert_default_datasource_config.sql",
+                "sql/006_insert_default_flink_config.sql"
             };
 
             for (String sqlFile : sqlFiles) {
@@ -157,28 +173,45 @@ public class DatabaseInitializer implements BeanFactoryPostProcessor, Environmen
 
                         StringBuilder sqlBuilder = new StringBuilder();
                         String line;
+                        boolean inMultilineStatement = false;
 
                         while ((line = reader.readLine()) != null) {
-                            line = line.trim();
+                            String trimmedLine = line.trim();
 
                             // Skip comments and empty lines
-                            if (line.isEmpty() || line.startsWith("--")) {
+                            if (trimmedLine.isEmpty() || trimmedLine.startsWith("--")) {
                                 continue;
                             }
 
-                            sqlBuilder.append(line).append(" ");
+                            // Check if we're starting a multi-line statement
+                            if (trimmedLine.toUpperCase().startsWith("INSERT") ||
+                                trimmedLine.toUpperCase().startsWith("UPDATE") ||
+                                trimmedLine.toUpperCase().startsWith("CREATE") ||
+                                trimmedLine.toUpperCase().startsWith("ALTER")) {
+                                inMultilineStatement = true;
+                            }
+
+                            // Add the line with proper spacing
+                            if (sqlBuilder.length() > 0 && !sqlBuilder.toString().endsWith(" ")) {
+                                sqlBuilder.append(" ");
+                            }
+                            sqlBuilder.append(trimmedLine);
 
                             // Execute statement when semicolon is found
-                            if (line.endsWith(";")) {
+                            if (trimmedLine.endsWith(";")) {
                                 String sql = sqlBuilder.toString().trim();
                                 if (!sql.isEmpty()) {
                                     try {
                                         jdbcTemplate.execute(sql);
                                     } catch (Exception e) {
                                         log.warn("  ⚠️  Failed to execute SQL statement: {}", e.getMessage());
+                                        // Log the first 200 chars of the SQL for debugging
+                                        String sqlPreview = sql.length() > 200 ? sql.substring(0, 200) + "..." : sql;
+                                        log.debug("  Failed SQL: {}", sqlPreview);
                                     }
                                 }
                                 sqlBuilder.setLength(0);
+                                inMultilineStatement = false;
                             }
                         }
                     }

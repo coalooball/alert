@@ -263,7 +263,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Plus, Refresh, Edit, Delete, Coin, CirclePlus, View, DocumentCopy, Loading, Check, Warning
 } from '@element-plus/icons-vue'
-import axios from 'axios'
+import axios from '../utils/axios'
 
 export default {
   name: 'AlertStorageMappings',

@@ -4,7 +4,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "alert_storage_mapping")
+@Table(name = "alert_storage_mapping",
+       uniqueConstraints = @UniqueConstraint(columnNames = {"alert_type_id"}))
 public class AlertStorageMapping {
 
     @Id

@@ -187,7 +187,7 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Refresh, Right, Delete } from '@element-plus/icons-vue'
-import axios from 'axios'
+import axios from '../utils/axios'
 
 export default {
   name: 'RestHttpDataSourceConfig',

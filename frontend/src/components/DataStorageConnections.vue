@@ -193,7 +193,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Plus, Refresh, Edit, Delete, Connection, Check
 } from '@element-plus/icons-vue'
-import axios from 'axios'
+import axios from '../utils/axios'
 
 export default {
   name: 'DataStorageConnections',

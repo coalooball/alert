@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  # Alert System Application
+  alert-app:
+    container_name: alert-system
+    environment:
+      # Database configuration (使用外部数据库)
+      DATABASE_URL: jdbc:postgresql://localhost:5432/alert_system
+      DATABASE_USER: admin
+      DATABASE_PASSWORD: postgres123
+
+      # Server configuration
+      SERVER_PORT: 3000
+      SERVER_HOST: 0.0.0.0
+
+      # Java JVM options
+      JAVA_OPTS: "-Xmx1g -Xms512m -XX:+UseG1GC"
+
+      # Spring profiles (if needed)
+      SPRING_PROFILES_ACTIVE: prod
+
+    network_mode: "host"
+    volumes:
+      # Optional: Mount logs directory
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/system-info"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
