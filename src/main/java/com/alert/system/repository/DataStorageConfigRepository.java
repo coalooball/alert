@@ -40,4 +40,6 @@ public interface DataStorageConfigRepository extends JpaRepository<DataStorageCo
     @Override
     @EntityGraph(attributePaths = {"createdBy", "updatedBy"})
     Optional<DataStorageConfig> findById(Long id);
+
+    List<DataStorageConfig> findByIsDefault(Boolean isDefault);
 }

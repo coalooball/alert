@@ -33,4 +33,10 @@ public interface AlertFilterRuleRepository extends JpaRepository<AlertFilterRule
     List<AlertFilterRule> searchByKeyword(@Param("keyword") String keyword);
 
     boolean existsByRuleName(String ruleName);
+
+    @Query("SELECT r FROM AlertFilterRule r WHERE r.alertType = :alertType AND r.isEnabled = :isEnabled ORDER BY r.priority DESC")
+    List<AlertFilterRule> findByAlertTypeAndIsEnabledOrderByPriority(
+        @Param("alertType") Integer alertType,
+        @Param("isEnabled") Boolean isEnabled
+    );
 }

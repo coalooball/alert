@@ -26,4 +26,6 @@ public interface FlinkConfigRepository extends JpaRepository<FlinkConfig, UUID> 
     @Modifying
     @Query("UPDATE FlinkConfig f SET f.isActive = false WHERE f.id != :id")
     void deactivateOthers(@Param("id") UUID id);
+
+    Optional<FlinkConfig> findByIsActiveTrue();
 }

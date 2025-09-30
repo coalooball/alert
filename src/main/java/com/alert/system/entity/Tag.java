@@ -81,6 +81,23 @@ public class Tag {
         this.tagName = tagName;
     }
 
+    // Alias methods for compatibility
+    public String getName() {
+        return tagName;
+    }
+
+    public void setName(String name) {
+        this.tagName = name;
+    }
+
+    public String getCategory() {
+        return tagType;
+    }
+
+    public void setCategory(String category) {
+        this.tagType = category;
+    }
+
     public String getDescription() {
         return description;
     }

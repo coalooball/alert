@@ -37,6 +37,12 @@ public class AlertField {
     @Column(name = "field_type", length = 50)
     private String fieldType = "string";
 
+    @Column(name = "data_type", length = 50)
+    private String dataType = "string";
+
+    @Column(name = "field_path", length = 200)
+    private String fieldPath;
+
     @Column(columnDefinition = "TEXT")
     private String description;
 

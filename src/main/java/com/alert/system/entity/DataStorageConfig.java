@@ -37,6 +37,12 @@ public class DataStorageConfig {
     @Column(name = "connection_params", columnDefinition = "TEXT")
     private String connectionParams;
 
+    @Column(name = "storage_type", length = 50)
+    private String storageType;
+
+    @Column(name = "additional_config", columnDefinition = "JSON")
+    private String additionalConfig;
+
     @Column(name = "max_connections")
     private Integer maxConnections = 10;
 
@@ -188,6 +194,22 @@ public class DataStorageConfig {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getStorageType() {
+        return storageType != null ? storageType : (dbType != null ? dbType.toString().toLowerCase() : "clickhouse");
+    }
+
+    public void setStorageType(String storageType) {
+        this.storageType = storageType;
+    }
+
+    public String getAdditionalConfig() {
+        return additionalConfig;
+    }
+
+    public void setAdditionalConfig(String additionalConfig) {
+        this.additionalConfig = additionalConfig;
     }
 
     public User getCreatedBy() {

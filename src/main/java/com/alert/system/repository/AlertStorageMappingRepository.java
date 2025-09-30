@@ -26,4 +26,7 @@ public interface AlertStorageMappingRepository extends JpaRepository<AlertStorag
     Optional<AlertStorageMapping> findById(Long id);
 
     boolean existsByAlertTypeIdAndIdNot(Integer alertTypeId, Long id);
+
+    @EntityGraph(attributePaths = {"alertType", "storageConfig"})
+    Optional<AlertStorageMapping> findByAlertType_Id(Integer alertTypeId);
 }

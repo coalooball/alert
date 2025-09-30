@@ -75,4 +75,11 @@ public interface TagRepository extends JpaRepository<Tag, UUID> {
      */
     @Query("SELECT COUNT(t) > 0 FROM Tag t WHERE t.tagName = :tagName AND t.id != :id")
     boolean existsByTagNameAndIdNot(@Param("tagName") String tagName, @Param("id") UUID id);
+
+    /**
+     * Find tag by name (alias for findByTagName)
+     */
+    default Optional<Tag> findByName(String name) {
+        return findByTagName(name);
+    }
 }

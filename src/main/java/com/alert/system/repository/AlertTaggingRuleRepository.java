@@ -61,4 +61,10 @@ public interface AlertTaggingRuleRepository extends JpaRepository<AlertTaggingRu
      * Count enabled rules
      */
     long countByIsEnabled(Boolean isEnabled);
+
+    @Query("SELECT r FROM AlertTaggingRule r WHERE r.alertType = :alertType AND r.isEnabled = :isEnabled ORDER BY r.priority DESC")
+    List<AlertTaggingRule> findByAlertTypeAndIsEnabledOrderByPriority(
+        @Param("alertType") Integer alertType,
+        @Param("isEnabled") Boolean isEnabled
+    );
 }
