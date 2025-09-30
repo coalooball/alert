@@ -1,8 +1,7 @@
-version: '3.8'
-
 services:
   # Alert System Application
-  alert-app:
+  alert-system:
+    image: system-alert:latest
     container_name: alert-system
     environment:
       # Database configuration (使用外部数据库)

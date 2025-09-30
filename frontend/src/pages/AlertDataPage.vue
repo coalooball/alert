@@ -36,19 +36,11 @@
                 value-format="YYYY-MM-DD HH:mm:ss"
               />
             </el-form-item>
-            <el-form-item label="严重级别">
+            <el-form-item label="告警等级">
               <el-select v-model="filters.severity" placeholder="请选择" clearable>
-                <el-option label="严重" value="CRITICAL" />
-                <el-option label="高危" value="HIGH" />
-                <el-option label="中危" value="MEDIUM" />
-                <el-option label="低危" value="LOW" />
-              </el-select>
-            </el-form-item>
-            <el-form-item label="状态">
-              <el-select v-model="filters.status" placeholder="请选择" clearable>
-                <el-option label="新告警" value="NEW" />
-                <el-option label="处理中" value="IN_PROGRESS" />
-                <el-option label="已解决" value="RESOLVED" />
+                <el-option label="低危" :value="1" />
+                <el-option label="中危" :value="2" />
+                <el-option label="高危" :value="3" />
               </el-select>
             </el-form-item>
             <el-form-item>
@@ -270,8 +262,7 @@ export default {
       loading: false,
       filters: {
         dateRange: null,
-        severity: '',
-        status: ''
+        severity: ''
       },
       pagination: {
         currentPage: 1,
@@ -584,8 +575,7 @@ export default {
     resetFilters() {
       this.filters = {
         dateRange: null,
-        severity: '',
-        status: ''
+        severity: ''
       }
       this.fetchAlertData()
     },

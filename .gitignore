@@ -93,3 +93,6 @@ server.log
 mock/*.json
 
 prompt.txt
+
+# Docker images
+*.tar
