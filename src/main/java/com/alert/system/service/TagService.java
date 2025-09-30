@@ -2,10 +2,8 @@ package com.alert.system.service;
 
 import com.alert.system.dto.TagRequest;
 import com.alert.system.dto.TagResponse;
-import com.alert.system.entity.Tag;
-import com.alert.system.entity.User;
-import com.alert.system.repository.TagRepository;
-import com.alert.system.repository.UserRepository;
+import com.alert.system.entity.*;
+import com.alert.system.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,9 +14,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,6 +27,12 @@ public class TagService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private AlertRepository alertRepository;
+
+    @Autowired
+    private AlertTagMappingRepository alertTagMappingRepository;
 
     /**
      * 分页查询标签列表（支持搜索）
@@ -179,5 +182,64 @@ public class TagService {
      */
     public boolean tagNameExists(String tagName) {
         return tagRepository.findByTagName(tagName).isPresent();
+    }
+
+    /**
+     * 获取告警的标签
+     */
+    public List<TagResponse> getAlertTags(String alertUuid) {
+        Alert alert = alertRepository.findByAlertUuid(alertUuid)
+                .orElseThrow(() -> new IllegalArgumentException("告警不存在: " + alertUuid));
+
+        List<AlertTagMapping> mappings = alertTagMappingRepository.findByAlert(alert);
+        return mappings.stream()
+                .map(mapping -> new TagResponse(mapping.getTag()))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 给告警添加标签
+     */
+    public List<TagResponse> addTagsToAlert(String alertUuid, List<String> tagIds) {
+        Alert alert = alertRepository.findByAlertUuid(alertUuid)
+                .orElseThrow(() -> new IllegalArgumentException("告警不存在: " + alertUuid));
+
+        User currentUser = getCurrentUser();
+        List<TagResponse> addedTags = new ArrayList<>();
+
+        for (String tagIdStr : tagIds) {
+            UUID tagId = UUID.fromString(tagIdStr);
+            Tag tag = tagRepository.findById(tagId)
+                    .orElseThrow(() -> new IllegalArgumentException("标签不存在: " + tagId));
+
+            // 检查是否已存在
+            if (!alertTagMappingRepository.existsByAlertAndTag(alert, tag)) {
+                AlertTagMapping mapping = new AlertTagMapping();
+                mapping.setAlert(alert);
+                mapping.setTag(tag);
+                mapping.setIsAutoTagged(false);
+                mapping.setCreatedBy(currentUser);
+                mapping.setCreatedAt(LocalDateTime.now());
+
+                alertTagMappingRepository.save(mapping);
+                addedTags.add(new TagResponse(tag));
+            }
+        }
+
+        return addedTags;
+    }
+
+    /**
+     * 从告警移除标签
+     */
+    public void removeTagFromAlert(String alertUuid, String tagId) {
+        Alert alert = alertRepository.findByAlertUuid(alertUuid)
+                .orElseThrow(() -> new IllegalArgumentException("告警不存在: " + alertUuid));
+
+        UUID tagUuid = UUID.fromString(tagId);
+        Tag tag = tagRepository.findById(tagUuid)
+                .orElseThrow(() -> new IllegalArgumentException("标签不存在: " + tagId));
+
+        alertTagMappingRepository.deleteByAlertAndTag(alert, tag);
     }
 }

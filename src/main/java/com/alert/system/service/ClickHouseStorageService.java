@@ -227,6 +227,12 @@ public class ClickHouseStorageService {
             return 0;
         }
 
+        // 检查表是否存在
+        if (!tableExists(defaultConfig, tableName)) {
+            log.warn("Table {} does not exist in ClickHouse", tableName);
+            return 0;
+        }
+
         String query = String.format(
             "SELECT COUNT(*) FROM %s %s",
             tableName,
@@ -242,10 +248,21 @@ public class ClickHouseStorageService {
             }
 
         } catch (Exception e) {
-            log.error("Error counting alerts in ClickHouse", e);
+            log.error("Error counting alerts in ClickHouse table {}: {}", tableName, e.getMessage());
         }
 
         return 0;
+    }
+
+    private boolean tableExists(DataStorageConfig config, String tableName) {
+        try (Connection conn = getConnection(config)) {
+            DatabaseMetaData metadata = conn.getMetaData();
+            ResultSet tables = metadata.getTables(null, null, tableName, null);
+            return tables.next();
+        } catch (Exception e) {
+            log.error("Error checking if table {} exists: {}", tableName, e.getMessage());
+            return false;
+        }
     }
 
     public void deleteOldAlerts(String tableName, int retentionDays) {

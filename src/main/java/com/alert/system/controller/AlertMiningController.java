@@ -135,4 +135,14 @@ public class AlertMiningController {
 
         return ResponseEntity.ok(stats);
     }
+
+    @GetMapping("/statistics/by-type")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Map<String, Object>> getAlertStatisticsByType() {
+        logger.info("Fetching alert statistics by type");
+
+        Map<String, Object> stats = alertMiningService.getAlertStatisticsByType();
+
+        return ResponseEntity.ok(stats);
+    }
 }

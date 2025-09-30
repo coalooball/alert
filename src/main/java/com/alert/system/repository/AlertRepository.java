@@ -54,4 +54,18 @@ public interface AlertRepository extends JpaRepository<Alert, UUID> {
 
     @Query("SELECT a FROM Alert a WHERE a.alertType.id = :typeId ORDER BY a.alertTime DESC")
     List<Alert> findByAlertTypeId(@Param("typeId") Integer typeId);
+
+    @Query("SELECT COUNT(a) FROM Alert a WHERE a.alertType.id = :typeId")
+    Long countByAlertTypeId(@Param("typeId") Integer typeId);
+
+    @Query("SELECT COUNT(a) FROM Alert a WHERE a.alertType.id = :typeId AND a.alertTime >= :startTime")
+    Long countByAlertTypeIdAfter(@Param("typeId") Integer typeId, @Param("startTime") LocalDateTime startTime);
+
+    @Query("SELECT COUNT(a) FROM Alert a WHERE a.alertType.id = :typeId AND a.status = 'NEW'")
+    Long countPendingByAlertTypeId(@Param("typeId") Integer typeId);
+
+    @Query("SELECT COUNT(DISTINCT a) FROM Alert a " +
+           "JOIN AlertTagMapping atm ON atm.alert.id = a.id " +
+           "WHERE a.alertType.id = :typeId")
+    Long countTaggedByAlertTypeId(@Param("typeId") Integer typeId);
 }

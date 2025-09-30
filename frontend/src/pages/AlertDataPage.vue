@@ -10,24 +10,14 @@
       >
         <!-- 统计信息卡片 -->
         <el-row :gutter="20" class="stats-row">
-          <el-col :span="6">
+          <el-col :span="12">
             <el-card class="stat-card">
               <el-statistic title="总告警数" :value="statistics[alertType?.id]?.total || 0" />
             </el-card>
           </el-col>
-          <el-col :span="6">
+          <el-col :span="12">
             <el-card class="stat-card">
               <el-statistic title="今日新增" :value="statistics[alertType?.id]?.today || 0" />
-            </el-card>
-          </el-col>
-          <el-col :span="6">
-            <el-card class="stat-card">
-              <el-statistic title="未处理" :value="statistics[alertType?.id]?.pending || 0" />
-            </el-card>
-          </el-col>
-          <el-col :span="6">
-            <el-card class="stat-card">
-              <el-statistic title="已标记" :value="statistics[alertType?.id]?.tagged || 0" />
             </el-card>
           </el-col>
         </el-row>
@@ -97,14 +87,22 @@
                   {{ formatDate(scope.row[field.fieldName]) }}
                 </span>
                 <span v-else-if="field.fieldName === 'tags'">
-                  <el-tag
-                    v-for="tag in scope.row.tags"
-                    :key="tag.id"
-                    :style="{ marginRight: '5px', backgroundColor: tag.color + '20', borderColor: tag.color, color: tag.color }"
-                    size="small"
-                  >
-                    {{ tag.tagName }}
-                  </el-tag>
+                  <template v-if="Array.isArray(scope.row.tags) && scope.row.tags.length > 0">
+                    <el-tag
+                      v-for="tag in scope.row.tags"
+                      :key="tag.id || tag"
+                      :style="{
+                        marginRight: '5px',
+                        backgroundColor: (tag.color || '#409EFF') + '20',
+                        borderColor: tag.color || '#409EFF',
+                        color: tag.color || '#409EFF'
+                      }"
+                      size="small"
+                    >
+                      {{ tag.tagName || tag.name || (typeof tag === 'string' ? tag : '-') }}
+                    </el-tag>
+                  </template>
+                  <span v-else>-</span>
                 </span>
                 <span v-else>
                   {{ formatFieldValue(scope.row[field.fieldName], field.fieldType) }}
@@ -160,6 +158,24 @@
           <span v-else-if="field.fieldName === 'alarm_date'">
             {{ formatDate(currentAlert[field.fieldName]) }}
           </span>
+          <span v-else-if="field.fieldName === 'tags'">
+            <template v-if="Array.isArray(currentAlert.tags) && currentAlert.tags.length > 0">
+              <el-tag
+                v-for="tag in currentAlert.tags"
+                :key="tag.id || tag"
+                :style="{
+                  marginRight: '5px',
+                  backgroundColor: (tag.color || '#409EFF') + '20',
+                  borderColor: tag.color || '#409EFF',
+                  color: tag.color || '#409EFF'
+                }"
+                size="small"
+              >
+                {{ tag.tagName || tag.name || (typeof tag === 'string' ? tag : '-') }}
+              </el-tag>
+            </template>
+            <span v-else>-</span>
+          </span>
           <span v-else>
             {{ formatFieldValue(currentAlert[field.fieldName], field.fieldType) }}
           </span>
@@ -170,10 +186,15 @@
         <h4>关联标签</h4>
         <el-tag
           v-for="tag in currentAlert.tags"
-          :key="tag.id"
-          :style="{ marginRight: '10px', backgroundColor: tag.color + '20', borderColor: tag.color, color: tag.color }"
+          :key="tag.id || tag"
+          :style="{
+            marginRight: '10px',
+            backgroundColor: (tag.color || '#409EFF') + '20',
+            borderColor: tag.color || '#409EFF',
+            color: tag.color || '#409EFF'
+          }"
         >
-          {{ tag.tagName }} ({{ (tag.confidenceScore * 100).toFixed(0) }}%)
+          {{ tag.tagName || tag.name || tag }}
         </el-tag>
       </div>
 
@@ -182,12 +203,60 @@
         <pre>{{ JSON.stringify(currentAlert.rawData, null, 2) }}</pre>
       </div>
     </el-dialog>
+
+    <!-- 添加标签对话框 -->
+    <el-dialog
+      v-model="tagDialogVisible"
+      title="添加标签"
+      width="600px"
+    >
+      <div class="tag-selection">
+        <p style="margin-bottom: 15px;">选择要添加的标签：</p>
+        <el-checkbox-group v-model="selectedTags">
+          <el-checkbox
+            v-for="tag in availableTags"
+            :key="tag.id"
+            :label="tag.id"
+            :style="{ marginRight: '15px', marginBottom: '10px' }"
+          >
+            <el-tag
+              :style="{ backgroundColor: tag.color + '20', borderColor: tag.color, color: tag.color }"
+              size="default"
+            >
+              {{ tag.tagName }}
+            </el-tag>
+          </el-checkbox>
+        </el-checkbox-group>
+      </div>
+
+      <div v-if="currentAlertTags && currentAlertTags.length > 0" class="existing-tags">
+        <p style="margin: 20px 0 10px;">已有标签：</p>
+        <el-tag
+          v-for="tag in currentAlertTags"
+          :key="tag.id"
+          :style="{ marginRight: '10px', backgroundColor: tag.color + '20', borderColor: tag.color, color: tag.color }"
+          closable
+          @close="removeTag(tag)"
+        >
+          {{ tag.tagName }}
+        </el-tag>
+      </div>
+
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="tagDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="confirmAddTags" :disabled="selectedTags.length === 0">
+            确定
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { ElMessage } from 'element-plus'
-import axios from 'axios'
+import axios from '../utils/axios'
 
 export default {
   name: 'AlertDataPage',
@@ -211,7 +280,12 @@ export default {
       },
       statistics: {},
       detailDialogVisible: false,
-      currentAlert: {}
+      currentAlert: {},
+      tagDialogVisible: false,
+      availableTags: [],
+      selectedTags: [],
+      currentAlertTags: [],
+      currentTagAlert: null
     }
   },
   watch: {
@@ -221,6 +295,7 @@ export default {
         this.updateCurrentFields()
         this.pagination.currentPage = 1
         this.fetchAlertData()
+        this.fetchStatistics() // 刷新统计数据
       }
     }
   },
@@ -313,9 +388,11 @@ export default {
 
         // 使用新的API端点
         const response = await axios.get(`/api/alert-mining/alerts/by-type/${this.activeAlertType}`, { params })
+        console.log('Alert data response:', response.data)
 
         // 转换数据格式以匹配字段配置
         this.alertData = response.data.alerts.map(alert => {
+          console.log('Individual alert before processing:', alert)
           // 解析parsedData字段
           let parsedData = {}
           if (alert.parsedData) {
@@ -333,6 +410,7 @@ export default {
           // 合并所有数据源，优先使用parsedData中的字段
           const formattedAlert = {
             id: alert.id,
+            alert_uuid: alert.alert_uuid || alert.alertUuid, // 确保alert_uuid存在
             alarm_id: parsedData.alarm_id || alert.alertUuid,
             alarm_date: parsedData.alarm_date || alert.alertTime,
             alarm_severity: parsedData.alarm_severity || this.mapSeverity(alert.severity),
@@ -352,9 +430,11 @@ export default {
           if (parsedData.src_port !== undefined) formattedAlert.src_port = parsedData.src_port
           if (parsedData.dst_port !== undefined) formattedAlert.dst_port = parsedData.dst_port
 
+          console.log('Formatted alert with alert_uuid:', formattedAlert.alert_uuid, formattedAlert)
           return formattedAlert
         })
 
+        console.log('Final alertData:', this.alertData)
         this.pagination.total = response.data.totalItems || 0
       } catch (error) {
         ElMessage.error('获取告警数据失败: ' + error.message)
@@ -365,30 +445,31 @@ export default {
 
     async fetchStatistics() {
       try {
-        const response = await axios.get('/api/alert-mining/statistics')
-        // 模拟按类型的统计数据
-        this.statistics = {
-          1: {
-            total: response.data.totalAlerts || 0,
-            today: response.data.last24HoursCount || 0,
-            pending: Math.floor((response.data.totalAlerts || 0) * 0.3),
-            tagged: response.data.autoTaggedAlerts || 0
-          },
-          2: {
-            total: Math.floor((response.data.totalAlerts || 0) * 0.4),
-            today: Math.floor((response.data.last24HoursCount || 0) * 0.4),
-            pending: Math.floor((response.data.totalAlerts || 0) * 0.2),
-            tagged: Math.floor((response.data.autoTaggedAlerts || 0) * 0.4)
-          },
-          3: {
-            total: Math.floor((response.data.totalAlerts || 0) * 0.3),
-            today: Math.floor((response.data.last24HoursCount || 0) * 0.3),
-            pending: Math.floor((response.data.totalAlerts || 0) * 0.1),
-            tagged: Math.floor((response.data.autoTaggedAlerts || 0) * 0.3)
+        const response = await axios.get('/api/alert-mining/statistics/by-type')
+        // 使用真实的按类型统计数据
+        this.statistics = response.data || {}
+
+        // 如果某个类型没有统计数据，设置默认值
+        for (const alertType of this.alertTypes) {
+          if (alertType && alertType.id && !this.statistics[alertType.id]) {
+            this.statistics[alertType.id] = {
+              total: 0,
+              today: 0
+            }
           }
         }
       } catch (error) {
         console.error('获取统计信息失败:', error)
+        // 失败时设置默认值
+        this.statistics = {}
+        for (const alertType of this.alertTypes) {
+          if (alertType && alertType.id) {
+            this.statistics[alertType.id] = {
+              total: 0,
+              today: 0
+            }
+          }
+        }
       }
     },
 
@@ -418,8 +499,86 @@ export default {
       this.detailDialogVisible = true
     },
 
-    addTag(row) {
-      ElMessage.info('标记功能开发中...')
+    async addTag(row) {
+      console.log('Adding tag for row:', row)
+      console.log('Alert UUID:', row.alert_uuid)
+      this.currentTagAlert = row
+      this.selectedTags = []
+
+      // 获取所有可用标签
+      await this.fetchAvailableTags()
+
+      // 获取告警已有标签
+      if (row.alert_uuid) {
+        await this.fetchAlertTags(row.alert_uuid)
+      } else {
+        console.error('Alert UUID is undefined!')
+        ElMessage.error('告警UUID未定义，无法添加标签')
+        return
+      }
+
+      this.tagDialogVisible = true
+    },
+
+    async fetchAvailableTags() {
+      try {
+        const response = await axios.get('/api/tags/enabled')
+        this.availableTags = response.data.data || []
+      } catch (error) {
+        ElMessage.error('获取标签列表失败: ' + error.message)
+      }
+    },
+
+    async fetchAlertTags(alertUuid) {
+      try {
+        const response = await axios.get(`/api/tags/alert/${alertUuid}`)
+        this.currentAlertTags = response.data.data || []
+      } catch (error) {
+        console.error('获取告警标签失败:', error)
+        this.currentAlertTags = []
+      }
+    },
+
+    async confirmAddTags() {
+      if (this.selectedTags.length === 0) {
+        ElMessage.warning('请选择要添加的标签')
+        return
+      }
+
+      try {
+        const response = await axios.post(
+          `/api/tags/alert/${this.currentTagAlert.alert_uuid}`,
+          { tagIds: this.selectedTags }
+        )
+
+        ElMessage.success('标签添加成功')
+
+        // 刷新告警数据以显示新标签
+        await this.fetchAlertData()
+
+        this.tagDialogVisible = false
+      } catch (error) {
+        ElMessage.error('添加标签失败: ' + error.message)
+      }
+    },
+
+    async removeTag(tag) {
+      try {
+        await axios.delete(`/api/tags/alert/${this.currentTagAlert.alert_uuid}/${tag.id}`)
+
+        ElMessage.success('标签移除成功')
+
+        // 从当前标签列表中移除
+        const index = this.currentAlertTags.findIndex(t => t.id === tag.id)
+        if (index > -1) {
+          this.currentAlertTags.splice(index, 1)
+        }
+
+        // 刷新告警数据
+        await this.fetchAlertData()
+      } catch (error) {
+        ElMessage.error('移除标签失败: ' + error.message)
+      }
     },
 
     resetFilters() {
@@ -493,6 +652,16 @@ export default {
 
     formatFieldValue(value, fieldType) {
       if (value === null || value === undefined) return '-'
+
+      // 特殊处理标签数组
+      if (Array.isArray(value)) {
+        if (value.length === 0) return '-'
+        // 如果是标签对象数组，提取标签名称
+        if (value[0] && typeof value[0] === 'object') {
+          return value.map(item => item.tagName || item.name || '-').join(', ')
+        }
+        return value.join(', ')
+      }
 
       if (fieldType === 'number') {
         return String(value)

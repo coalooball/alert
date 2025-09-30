@@ -3,10 +3,12 @@ package com.alert.system.service;
 import com.alert.system.entity.Alert;
 import com.alert.system.entity.AlertStorageMapping;
 import com.alert.system.entity.AlertTagMapping;
+import com.alert.system.entity.AlertType;
 import com.alert.system.entity.Tag;
 import com.alert.system.repository.AlertRepository;
 import com.alert.system.repository.AlertStorageMappingRepository;
 import com.alert.system.repository.AlertTagMappingRepository;
+import com.alert.system.repository.AlertTypeRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +40,9 @@ public class AlertMiningService {
 
     @Autowired
     private AlertTagMappingRepository tagMappingRepository;
+
+    @Autowired
+    private AlertTypeRepository alertTypeRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -314,12 +319,60 @@ public class AlertMiningService {
         return stats;
     }
 
+    public Map<String, Object> getAlertStatisticsByType() {
+        Map<String, Object> stats = new HashMap<>();
+        LocalDateTime last24Hours = LocalDateTime.now().minusHours(24);
+        String last24HoursStr = last24Hours.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+        // 获取所有告警类型及其存储映射
+        List<AlertType> alertTypes = alertTypeRepository.findAll();
+
+        for (AlertType alertType : alertTypes) {
+            Integer typeId = alertType.getId();
+            Map<String, Object> typeStats = new HashMap<>();
+
+            // 获取该类型的存储映射
+            Optional<AlertStorageMapping> mappingOpt = storageMappingRepository.findByAlertType_Id(typeId);
+
+            if (mappingOpt.isPresent() && clickHouseStorageService != null) {
+                AlertStorageMapping mapping = mappingOpt.get();
+                String tableName = mapping.getTableName();
+
+                try {
+                    // 从 ClickHouse 获取总告警数
+                    long total = clickHouseStorageService.countAlerts(tableName, null);
+                    typeStats.put("total", total);
+
+                    // 从 ClickHouse 获取今日新增
+                    String todayWhereClause = String.format("alert_time >= '%s'", last24HoursStr);
+                    long today = clickHouseStorageService.countAlerts(tableName, todayWhereClause);
+                    typeStats.put("today", today);
+
+                } catch (Exception e) {
+                    logger.error("Error getting statistics from ClickHouse for type {}: {}", typeId, e.getMessage());
+                    // 如果 ClickHouse 查询失败，返回默认值
+                    typeStats.put("total", 0L);
+                    typeStats.put("today", 0L);
+                }
+            } else {
+                // 如果没有 ClickHouse 映射，从 PostgreSQL 获取
+                typeStats.put("total", alertRepository.countByAlertTypeId(typeId));
+                typeStats.put("today", alertRepository.countByAlertTypeIdAfter(typeId, last24Hours));
+            }
+
+            stats.put(String.valueOf(typeId), typeStats);
+        }
+
+        return stats;
+    }
+
     private Map<String, Object> convertClickHouseRowToAlertMap(Map<String, Object> row, Integer alertTypeId) {
         Map<String, Object> alertMap = new LinkedHashMap<>();
 
         // 映射 ClickHouse 字段到前端期望的格式
         alertMap.put("id", row.get("id"));
         alertMap.put("alertUuid", row.get("alert_uuid"));
+        alertMap.put("alert_uuid", row.get("alert_uuid")); // 前端使用 alert_uuid
         alertMap.put("alertType", getAlertTypeName(alertTypeId));
         alertMap.put("alertSubtype", row.get("alert_subtype"));
 

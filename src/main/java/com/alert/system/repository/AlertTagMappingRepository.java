@@ -1,7 +1,10 @@
 package com.alert.system.repository;
 
+import com.alert.system.entity.Alert;
 import com.alert.system.entity.AlertTagMapping;
+import com.alert.system.entity.Tag;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -30,4 +33,11 @@ public interface AlertTagMappingRepository extends JpaRepository<AlertTagMapping
 
     @Query("SELECT COUNT(DISTINCT m.alert.id) FROM AlertTagMapping m WHERE m.isAutoTagged = true")
     Long countAutoTaggedAlerts();
+
+    List<AlertTagMapping> findByAlert(Alert alert);
+
+    boolean existsByAlertAndTag(Alert alert, Tag tag);
+
+    @Modifying
+    void deleteByAlertAndTag(Alert alert, Tag tag);
 }

@@ -223,4 +223,65 @@ public class TagController {
                     .body(ApiResponse.error("检查失败: " + e.getMessage()));
         }
     }
+
+    /**
+     * 获取告警的标签
+     */
+    @GetMapping("/alert/{alertUuid}")
+    public ResponseEntity<ApiResponse<List<TagResponse>>> getAlertTags(@PathVariable String alertUuid) {
+        logger.info("查询告警标签 - alertUuid: {}", alertUuid);
+
+        try {
+            List<TagResponse> tags = tagService.getAlertTags(alertUuid);
+            return ResponseEntity.ok(ApiResponse.success("查询成功", tags));
+        } catch (Exception e) {
+            logger.error("查询告警标签失败 - alertUuid: {}", alertUuid, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("查询失败: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * 给告警添加标签
+     */
+    @PostMapping("/alert/{alertUuid}")
+    public ResponseEntity<ApiResponse<List<TagResponse>>> addTagsToAlert(
+            @PathVariable String alertUuid,
+            @RequestBody Map<String, Object> request) {
+        logger.info("给告警添加标签 - alertUuid: {}, 请求: {}", alertUuid, request);
+
+        try {
+            List<String> tagIds = (List<String>) request.get("tagIds");
+            if (tagIds == null || tagIds.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(ApiResponse.error("请选择要添加的标签"));
+            }
+
+            List<TagResponse> addedTags = tagService.addTagsToAlert(alertUuid, tagIds);
+            return ResponseEntity.ok(ApiResponse.success("标签添加成功", addedTags));
+        } catch (Exception e) {
+            logger.error("添加告警标签失败 - alertUuid: {}", alertUuid, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("添加失败: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * 从告警移除标签
+     */
+    @DeleteMapping("/alert/{alertUuid}/{tagId}")
+    public ResponseEntity<ApiResponse<Void>> removeTagFromAlert(
+            @PathVariable String alertUuid,
+            @PathVariable String tagId) {
+        logger.info("从告警移除标签 - alertUuid: {}, tagId: {}", alertUuid, tagId);
+
+        try {
+            tagService.removeTagFromAlert(alertUuid, tagId);
+            return ResponseEntity.ok(ApiResponse.success("标签移除成功", null));
+        } catch (Exception e) {
+            logger.error("移除告警标签失败 - alertUuid: {}, tagId: {}", alertUuid, tagId, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("移除失败: " + e.getMessage()));
+        }
+    }
 }
