@@ -184,13 +184,7 @@
                       <el-table :data="tags" stripe v-loading="tagLoading">
                         <el-table-column prop="tagName" label="标签名称" width="150">
                           <template #default="scope">
-                            <el-tag
-                              :color="scope.row.color"
-                              :effect="scope.row.isEnabled ? 'dark' : 'plain'"
-                              :style="{ color: getContrastColor(scope.row.color) }"
-                            >
-                              {{ scope.row.tagName }}
-                            </el-tag>
+                            <span>{{ scope.row.tagName }}</span>
                           </template>
                         </el-table-column>
                         <el-table-column prop="description" label="标签描述" show-overflow-tooltip />

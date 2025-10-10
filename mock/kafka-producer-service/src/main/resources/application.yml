@@ -1,0 +1,47 @@
+server:
+  port: ${SERVER_PORT:8888}
+  address: ${SERVER_HOST:0.0.0.0}
+
+spring:
+  application:
+    name: kafka-producer-service
+  
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB
+      max-request-size: 100MB
+      file-size-threshold: 10MB
+
+  kafka:
+    producer:
+      # 默认配置，可被请求参数覆盖
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      retries: 3
+      compression-type: gzip
+      batch-size: 16384
+      buffer-memory: 33554432
+
+logging:
+  level:
+    com.alert.producer: DEBUG
+    org.springframework.kafka: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+app:
+  version: 1.0.0
+  cors:
+    allowed-origins: "*"
+    allowed-methods: "*"
+    allowed-headers: "*"
+  
+  # 数据文件目录（只读）
+  data-directory: ${DATA_DIR:/app/data}
+  
+  # 上传文件目录（可写）
+  upload-directory: ${UPLOAD_DIR:/app/uploads}
+

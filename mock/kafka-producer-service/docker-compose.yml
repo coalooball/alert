@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  kafka-producer-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: kafka-producer-service:latest
+    container_name: kafka-producer-service
+    ports:
+      - "8888:8888"
+    environment:
+      - SERVER_PORT=8888
+      - SERVER_HOST=0.0.0.0
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}
+      - DATA_DIR=/app/data
+      - UPLOAD_DIR=/app/uploads
+      - JAVA_OPTS=-Xmx512m -Xms256m -XX:+UseG1GC
+    volumes:
+      # 挂载数据目录 - 将本地的mock数据文件映射到容器内（只读）
+      - ../:/app/data:ro
+      # 上传目录 - 可写，用于保存上传的文件
+      - ./uploads:/app/uploads
+      # 或者只挂载JSON文件（按需启用）
+      # - ../network_attack_mock_data.json:/app/data/network_attack_mock_data.json:ro
+      # - ../malicious_sample_mock_data.json:/app/data/malicious_sample_mock_data.json:ro
+      # - ../host_behavior_mock_data.json:/app/data/host_behavior_mock_data.json:ro
+    network_mode: host
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/api/kafka/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
